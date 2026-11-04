@@ -87,3 +87,31 @@ toolchain exceptions, not package installs.
 
 Decision: they stay explicit and logged. Do not add another non-winget
 installer without an ADR.
+
+## ADR 8: Windows Update is skippable, never silent
+
+Status: accepted, 2026-11-05.
+
+The Surface Book is stuck on the Windows 10 22H2 install. Waiting for a
+repair blocks every useful tool behind one failing step. Hiding the failure
+would be worse: an unpatched Windows 10 machine that looks provisioned is a
+security trap.
+
+Decision: `bootstrap.ps1 -SkipUpdates` removes only step `15-updates` and
+prints a warning on every run. `scripts/Diagnose-WindowsUpdate.ps1` reports
+the cause without changing anything. The docs state the trade-off, and the
+runbook keeps repair and ESU as the preferred path. The default run still
+installs updates and still refuses feature upgrades.
+
+## ADR 9: Interactive pager and listing tools fail soft
+
+Status: accepted, 2026-11-05.
+
+`bat`, `eza` and `delta` are core packages, but a failed winget install must
+not break the shell or every git command. A static `core.pager = delta` in
+the git config would do exactly that.
+
+Decision: the profile checks for each binary before aliasing it. `GIT_PAGER`
+is set to `delta` only when the binary exists, otherwise to `less -R`. Git
+config holds only the delta display settings, which are inert when delta is
+missing.

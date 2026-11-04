@@ -40,6 +40,8 @@ $required = @(
     'knowledge/hardware.md',
     'knowledge/windows-10-eol.md',
     'knowledge/migration-map.md',
+    'scripts/Diagnose-WindowsUpdate.ps1',
+    'scripts/Update-All.ps1',
     'repos.txt'
 )
 foreach ($relative in $required) {
@@ -99,6 +101,9 @@ if ($from.Count -eq 0 -or $from[0] -ne '40-dotfiles') { Add-Failure '-From filte
 
 $core = @(Get-PackageSection -Path (Join-Path $repoRoot 'config/packages.txt') -Section 'core')
 if ($core.Count -eq 0) { Add-Failure 'no [core] packages' }
+foreach ($id in @('sharkdp.bat', 'eza-community.eza', 'dandavison.delta', 'DEVCOM.JetBrainsMonoNerdFont')) {
+    if ($core -notcontains $id) { Add-Failure ("core packages missing: {0}" -f $id) }
+}
 
 $ai = @(Get-PackageSection -Path (Join-Path $repoRoot 'config/packages.txt') -Section 'ai')
 if ($ai.Count -eq 0) { Add-Failure 'no [ai] packages' }
@@ -108,6 +113,14 @@ if ($apps.Count -eq 0) { Add-Failure 'no [apps] packages' }
 
 foreach ($id in @($core + $ai + $apps)) {
     if ($id -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]+$') { Add-Failure ("bad winget id: {0}" -f $id) }
+}
+
+$bootstrapText = Get-Content -Path (Join-Path $repoRoot 'bootstrap.ps1') -Raw
+if ($bootstrapText -notmatch 'SkipUpdates') { Add-Failure 'bootstrap.ps1 has no -SkipUpdates switch' }
+
+$profileText = Get-Content -Path (Join-Path $repoRoot 'config/profile/Microsoft.PowerShell_profile.ps1') -Raw
+foreach ($needle in @('eza', 'Get-Command bat', 'delta', 'fcd', 'function update')) {
+    if ($profileText -notmatch [regex]::Escape($needle)) { Add-Failure ("profile missing: {0}" -f $needle) }
 }
 
 $macPath = Get-ChildItem -Path $repoRoot -Recurse -Filter '*.ps1' -File | Where-Object { $_.FullName -ne $PSCommandPath } | Select-String -Pattern '/Users/olitreadwell' -SimpleMatch -ErrorAction SilentlyContinue

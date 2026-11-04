@@ -21,6 +21,14 @@
 [diff]
 	algorithm = patience
 	renames = copies
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+	line-numbers = true
+	syntax-theme = TwoDark
+	side-by-side = false
+	hyperlinks = true
 [status]
 	showUntrackedFiles = all
 [log]

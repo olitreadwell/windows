@@ -9,12 +9,26 @@ no recent updates, no agent tooling. The repo detects that machine instead of
 assuming it. `knowledge/hardware.md` lists what the two Surface Book 2 sizes
 can be.
 
-## Stop before the quickstart
+## If Windows Update is stuck, start here
 
-If the machine is on unpatched Windows 10, read
-`docs/new-machine-runbook.md` and finish steps 1 to 3 first. Update Windows,
-then upgrade to Windows 11 or enrol in ESU. Do not download developer tools
-onto an unpatched Windows 10 machine.
+Windows 10 22H2 is the last feature update, so a stuck 22H2 install is a
+repair problem, not a newer release. Check it with the read-only script
+below. It changes nothing and prints the exact error code and next actions:
+
+```powershell
+.\scripts\Diagnose-WindowsUpdate.ps1
+```
+
+The update step is optional. To install the CLI and agent tooling while
+Windows Update is still failing:
+
+```powershell
+.\bootstrap.ps1 -SkipUpdates
+```
+
+State the trade-off plainly: the machine stays unpatched until Windows Update
+works. Read `docs/new-machine-runbook.md` for the security path, then upgrade
+to Windows 11 or enrol in ESU.
 
 ## Quickstart
 
@@ -40,6 +54,12 @@ Then the real run:
 powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1
 ```
 
+While Windows Update is stuck, use the fast path instead:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -SkipUpdates
+```
+
 If git is already installed, cloning works too:
 
 ```powershell
@@ -58,9 +78,19 @@ repo; the bootstrap still installs git and clones `dotfiles` and
 - `.\bootstrap.ps1 -DryRun` prints the plan and exits.
 - `.\bootstrap.ps1 -From 40-dotfiles` resumes from a step.
 - `.\bootstrap.ps1 -Only 90-verify` runs one step.
+- `.\bootstrap.ps1 -SkipUpdates` runs every step except Windows Update.
 - `.\bootstrap.ps1 -Yes` skips interactive auth prompts with warnings.
 - `.\bootstrap.ps1 -NoAdmin` skips the elevation guard. Admin-only steps will fail.
+- `.\scripts\Update-All.ps1` updates winget packages, mise runtimes and `gh` extensions.
+- `.\scripts\Diagnose-WindowsUpdate.ps1` reports why an update is stuck, read-only.
 - `.\tests\run.ps1` runs the gate on Windows.
+
+After step 40 the same two helpers run as the commands `update` and `wupdate`.
+
+One manual setting: Windows Terminal > Profiles > Defaults > Appearance >
+Font face > `JetBrainsMono Nerd Font`. Without it, `eza` icons and the
+Starship prompt show as boxes. The bootstrap installs the font but does not
+edit Terminal's JSON settings.
 
 ## Layout
 
@@ -76,7 +106,8 @@ repo; the bootstrap still installs git and clones `dotfiles` and
 
 1. Records the machine and creates a battery report and restore point.
 2. Installs pending security and quality updates without feature upgrades or an automatic reboot.
-3. Ensures `winget`, then installs the core CLI tools.
+3. Ensures `winget`, then installs the core CLI tools: `bat`, `eza`, `delta`,
+   `fzf`, `zoxide`, `ripgrep`, `fd`, a Nerd Font and `gsudo`.
 4. Authenticates `gh`, installs 1Password and configures its SSH agent pipe.
 5. Clones `dotfiles` and `ai-harness`, then links the Windows-safe configs.
 6. Installs runtimes through `mise`. `fnm` and `bun` are installed only if `mise` fails.

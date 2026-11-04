@@ -38,6 +38,32 @@ restart when asked. Then decide the support path:
 
 Do not browse, read email or run agents on an unpatched Windows 10 install.
 
+### If the 22H2 update is stuck
+
+Windows 10 22H2 is the final feature update. A machine stuck installing it is
+not missing a newer release; the install itself is failing. Run the
+read-only diagnosis first:
+
+```powershell
+.\scripts\Diagnose-WindowsUpdate.ps1
+```
+
+It reports the build, pending reboot, update services, free space, component
+store health, recent update errors and the tail of the setup logs. It changes
+nothing.
+
+Then pick one path:
+
+- Repair first: restart, free 20 GB on `C:`, run
+  `DISM /Online /Cleanup-Image /RestoreHealth` and `SFC /Scannow`, restart,
+  and retry Windows Update. This is the path that ends with a patched
+  machine.
+- Tooling first: run `.\bootstrap.ps1 -SkipUpdates`. The CLI and agent setup
+  completes now and the machine stays unpatched until the repair works.
+
+Tooling first is a deliberate trade-off, not a fix. Do not browse, read email
+or run agents on the unpatched install for long.
+
 ## 4. Get the repo without git
 
 The machine probably has no git. Download the ZIP instead:
@@ -78,6 +104,15 @@ Read the step list. The first run starts at `10-preflight`.
 .\bootstrap.ps1
 ```
 
+If Windows Update is still failing, run the fast path instead:
+
+```powershell
+.\bootstrap.ps1 -SkipUpdates
+```
+
+This skips only step `15-updates`. Everything else runs, including `winget`,
+Git, the CLI tools, the agent CLIs and the repo clones.
+
 Expect one or two restarts for Windows updates. After each restart, resume
 with:
 
@@ -96,6 +131,9 @@ Repeat until it reports no pending updates, then continue with
 - Run `gh auth status` and `claude auth login`.
 - Open a new PowerShell 7 window and check `starship --version` and
   `mise ls`.
+- Set Windows Terminal > Profiles > Defaults > Appearance > Font face to
+  `JetBrainsMono Nerd Font`. The bootstrap installs the font but leaves the
+  Terminal JSON file alone.
 - Restart once more so PATH changes reach every app.
 
 ## 8. Record the machine

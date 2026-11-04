@@ -14,6 +14,12 @@ Checked on 2026-11-05 against Microsoft's lifecycle and end-of-support pages.
 Windows 10 22H2 was the final feature update. After 2025-10-14 there are no
 security fixes, feature updates or technical support without ESU.
 
+A machine that is stuck installing 22H2 is failing a servicing or feature
+update, not waiting for a later version. Treat it as a repair: check free
+space, the pending reboot marker and the component store with
+`scripts/Diagnose-WindowsUpdate.ps1`. The bootstrap can skip that step with
+`-SkipUpdates`, but the machine stays unpatched until the repair works.
+
 ## Consumer ESU
 
 Eligibility is narrower than "any Windows 10 device". It needs Windows 10

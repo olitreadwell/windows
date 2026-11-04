@@ -16,11 +16,15 @@ powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1
 
 .EXAMPLE
 powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -From 40-dotfiles
+
+.EXAMPLE
+powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -SkipUpdates
 #>
 [CmdletBinding()]
 param(
     [string]$From,
     [string]$Only,
+    [switch]$SkipUpdates,
     [switch]$DryRun,
     [switch]$Yes,
     [switch]$NoAdmin
@@ -64,11 +68,17 @@ if (-not $machine.IsAdmin -and -not $NoAdmin -and -not $DryRun) {
 }
 
 $plan = @(Get-StepPlan -RepoRoot $repoRoot -From $From -Only $Only)
+if ($SkipUpdates) {
+    $plan = @($plan | Where-Object { $_ -ne '15-updates' })
+}
 if ($plan.Count -eq 0) {
     Write-Fail 'No steps matched. Check -From and -Only values.'
 }
 
 Write-Log ("plan: {0}" -f ($plan -join ' -> '))
+if ($SkipUpdates) {
+    Write-Warn 'Skipping 15-updates. This machine stays unpatched until you run it.'
+}
 if ($DryRun) {
     Write-Host ''
     Write-Host 'Dry run. Steps that would run:' -ForegroundColor Cyan

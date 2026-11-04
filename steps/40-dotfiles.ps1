@@ -60,6 +60,10 @@ Set-ManagedFile -Source $starshipSource -Destination (Join-Path $HOME '.config/s
 
 Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'config/mise.toml') -Destination (Join-Path $HOME '.config/mise/config.toml') | Out-Null
 
+$binDir = Join-Path $HOME 'bin'
+Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'scripts/Update-All.ps1') -Destination (Join-Path $binDir 'update.ps1') -CopyOnly | Out-Null
+Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'scripts/Diagnose-WindowsUpdate.ps1') -Destination (Join-Path $binDir 'diagnose-update.ps1') -CopyOnly | Out-Null
+
 $hooksSource = Join-Path $dotfiles 'git_hooks'
 if (Test-Path $hooksSource) {
     Set-ManagedDirectory -Source $hooksSource -Destination (Join-Path $HOME '.config/git/hooks') | Out-Null

@@ -17,6 +17,11 @@ sharkdp.fd
 junegunn.fzf
 ajeetdsouza.zoxide
 7zip.7zip
+sharkdp.bat
+eza-community.eza
+dandavison.delta
+DEVCOM.JetBrainsMonoNerdFont
+gerardog.gsudo
 
 # [ai] are the agent CLIs. Auth stays interactive.
 # Anthropic.ClaudeCode is the CLI. Anthropic.Claude is the desktop app.
