@@ -44,6 +44,7 @@ $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 Initialize-Log -RepoRoot $repoRoot
 $global:OliAssumeYes = [bool]$Yes
 $global:OliDryRun = [bool]$DryRun
+Write-Log ("run: {0}" -f $global:OliRunId)
 
 # Old Windows 10 builds default to TLS 1.0, which GitHub rejects.
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -87,17 +88,34 @@ if ($DryRun) {
 }
 
 $started = Get-Date
+$stepResults = @()
 foreach ($step in $plan) {
     $path = Join-Path $repoRoot ("steps/{0}.ps1" -f $step)
+    $stepStart = Get-Date
     Write-StepHeader $step
     try {
         & $path
     }
     catch {
-        Write-Fail ("step {0} failed: {1} | resume: .\bootstrap.ps1 -From {0}" -f $step, $_.Exception.Message)
+        $failure = $_.Exception.Message
+        $stepResults += [pscustomobject]@{
+            step    = $step
+            status  = 'failed'
+            seconds = [math]::Round(((Get-Date) - $stepStart).TotalSeconds, 1)
+            error   = $failure
+        }
+        Save-RunSummary -Status 'failed' -Started $started -Steps $stepResults
+        Write-Fail ("step {0} failed: {1} | resume: .\bootstrap.ps1 -From {0}" -f $step, $failure)
     }
+    $stepResults += [pscustomobject]@{
+        step    = $step
+        status  = 'ok'
+        seconds = [math]::Round(((Get-Date) - $stepStart).TotalSeconds, 1)
+    }
+    Write-Log ("step {0} took {1:n1}s" -f $step, ((Get-Date) - $stepStart).TotalSeconds)
 }
 
+Save-RunSummary -Status 'ok' -Started $started -Steps $stepResults
 $elapsed = (Get-Date) - $started
 Write-Host ''
 Write-Ok ("bootstrap finished in {0:n1} minutes" -f $elapsed.TotalMinutes)

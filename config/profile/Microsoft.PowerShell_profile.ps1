@@ -117,6 +117,19 @@ function wupdate {
     else { Write-Warning 'diagnose-update.ps1 is missing. Re-run: .\bootstrap.ps1 -Only 40-dotfiles' }
 }
 
+function logs {
+    $dir = Join-Path $env:LOCALAPPDATA 'oli-windows'
+    if (Test-Path $dir) { Invoke-Item $dir }
+    else { Write-Warning 'no log directory yet' }
+}
+
+function doctor {
+    wupdate
+    Write-Host ''
+    Write-Host 'pending package updates' -ForegroundColor Cyan
+    update -DryRun
+}
+
 function gs { git status -s @args }
 function gl { git pull --rebase @args }
 function gp { git push @args }
@@ -141,7 +154,15 @@ function work {
 $codexCompletion = Join-Path $HOME '.codex\completions.ps1'
 if (Test-Path $codexCompletion) { . $codexCompletion }
 
-if ((Get-Command fzf -ErrorAction SilentlyContinue) -and (Get-Command Set-PSReadLineKeyHandler -ErrorAction SilentlyContinue)) {
+$psfzf = Get-Module -ListAvailable -Name PSFzf | Select-Object -First 1
+if ($psfzf) {
+    Import-Module PSFzf -ErrorAction SilentlyContinue
+    if (Get-Command Set-PsFzfOption -ErrorAction SilentlyContinue) {
+        Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r' -ErrorAction SilentlyContinue
+        Set-PsFzfOption -EnableAliasFuzzyEdit -EnableAliasFuzzyGitStatus -ErrorAction SilentlyContinue
+    }
+}
+elseif ((Get-Command fzf -ErrorAction SilentlyContinue) -and (Get-Command Set-PSReadLineKeyHandler -ErrorAction SilentlyContinue)) {
     Set-PSReadLineKeyHandler -Key Ctrl+t -ScriptBlock {
         $file = $null
         if (Get-Command fd -ErrorAction SilentlyContinue) {
@@ -162,6 +183,10 @@ if ((Get-Command fzf -ErrorAction SilentlyContinue) -and (Get-Command Set-PSRead
             [Microsoft.PowerShell.PSConsoleReadLine]::Insert($line)
         }
     }
+}
+
+if (Get-Module -ListAvailable -Name Terminal-Icons) {
+    Import-Module Terminal-Icons -ErrorAction SilentlyContinue
 }
 
 if (Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue) {

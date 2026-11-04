@@ -148,5 +148,13 @@ commit them. Keep the serial number in local state only. This repo is public.
 ## If something fails
 
 The failing step prints a resume command. The full log is at
-`%LOCALAPPDATA%\oli-windows\bootstrap.log`. Do not delete the machine state
-directory; it holds the preflight facts and the battery report.
+`%LOCALAPPDATA%\oli-windows\bootstrap.log`. Failures also go to
+`errors.log`, and each run leaves `runs\<runid>.json` with per-step status
+and timing. Open the folder with:
+
+```powershell
+Invoke-Item "$env:LOCALAPPDATA\oli-windows"
+```
+
+Do not delete the machine state directory; it holds the preflight facts and
+the battery report.

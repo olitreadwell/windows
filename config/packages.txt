@@ -22,6 +22,20 @@ eza-community.eza
 dandavison.delta
 DEVCOM.JetBrainsMonoNerdFont
 gerardog.gsudo
+jqlang.jq
+Gyan.FFmpeg
+GnuPG.GnuPG
+Kubernetes.kubectl
+Helm.Helm
+Hashicorp.Terraform
+Amazon.AWSCLI
+Microsoft.AzureCLI
+MongoDB.Shell
+JesseDuffield.lazygit
+sxyazi.yazi
+Casey.Just
+direnv.direnv
+ducaale.xh
 
 # [ai] are the agent CLIs. Auth stays interactive.
 # Anthropic.ClaudeCode is the CLI. Anthropic.Claude is the desktop app.
@@ -29,12 +43,26 @@ gerardog.gsudo
 OpenAI.Codex
 Anthropic.ClaudeCode
 Ollama.Ollama
+SST.opencode
 
 # [apps] are GUI apps. Keep this list short.
 [apps]
 Google.Chrome
 Mozilla.Firefox
+Brave.Brave
 Microsoft.VisualStudioCode
 Obsidian.Obsidian
 Spotify.Spotify
 Microsoft.PowerToys
+Espanso.Espanso
+Tailscale.Tailscale
+SlackTechnologies.Slack
+GitHub.GitHubDesktop
+ShareX.ShareX
+voidtools.Everything
+AutoHotkey.AutoHotkey
+VideoLAN.VLC
+WinMerge.WinMerge
+AntibodySoftware.WizTree
+CrystalDewWorld.CrystalDiskInfo
+yang991178.fluent-reader

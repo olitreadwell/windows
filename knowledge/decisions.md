@@ -115,3 +115,33 @@ Decision: the profile checks for each binary before aliasing it. `GIT_PAGER`
 is set to `delta` only when the binary exists, otherwise to `less -R`. Git
 config holds only the delta display settings, which are inert when delta is
 missing.
+
+## ADR 10: Two PSGallery modules are allowed
+
+Status: accepted, 2026-11-05.
+
+Windows has no oh-my-zsh bundle. The plugin behaviours worth having are
+already separate: Starship for the prompt, PSReadLine for autosuggestions,
+fzf for history and files. Two behaviours still need a module:
+`PSFzf` for the standard `Ctrl+R` and `Ctrl+T` chords with previews, and
+`Terminal-Icons` for file icons in `Get-ChildItem`.
+
+Decision: step `47-pwsh-modules` installs those two from PSGallery into the
+current user scope. The step is non-fatal. The profile keeps its own fzf key
+bindings as a fallback when `PSFzf` is absent, so a failed module install
+degrades instead of breaking the shell. No other module joins the list
+without an ADR.
+
+## ADR 11: Settings stay reversible, UAC stays on
+
+Status: accepted, 2026-11-05.
+
+UAC prompts are annoying, and the tempting fix is to disable UAC or enable
+the built-in Administrator account. Both widen the blast radius of every
+mistake and every malicious script, and neither is needed for a smooth
+setup.
+
+Decision: step `12-settings` changes only long paths, Developer Mode and two
+Explorer display values. Each is read before it is written, so a second run
+changes nothing. `gsudo` gets a 30 minute elevation cache for the current
+user. UAC stays on and no account is enabled or elevated.

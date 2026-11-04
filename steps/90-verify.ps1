@@ -50,6 +50,11 @@ else {
 }
 Write-Host '  Set Windows Terminal > Profiles > Defaults > Appearance > Font face to JetBrainsMono Nerd Font.'
 
+foreach ($module in @('PSFzf', 'Terminal-Icons')) {
+    if (Get-Module -ListAvailable -Name $module) { Write-Ok ("module: {0}" -f $module) }
+    else { Write-Warn ("module missing: {0}" -f $module) }
+}
+
 Write-Host ''
 Write-Host 'Next actions for a human:' -ForegroundColor Cyan
 Write-Host '  1. Restart Windows if updates asked for it.'

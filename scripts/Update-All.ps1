@@ -85,6 +85,13 @@ if (Test-Tool 'codex') {
     }
 }
 
+Write-Section 'PowerShell modules'
+foreach ($module in @('PSFzf', 'Terminal-Icons')) {
+    if (Get-Module -ListAvailable -Name $module) {
+        Update-Module -Name $module -ErrorAction SilentlyContinue
+    }
+}
+
 Write-Host ''
 if ($DryRun) { Write-Host 'Dry run. Nothing was changed.' -ForegroundColor Yellow }
 else { Write-Host 'Updates finished. Open a new terminal if a CLI version looks stale.' -ForegroundColor Green }

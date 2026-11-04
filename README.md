@@ -114,22 +114,51 @@ edit Terminal's JSON settings.
 ## What stage 1 does
 
 1. Records the machine and creates a battery report and restore point.
-2. Installs pending security and quality updates without feature upgrades or an automatic reboot.
-3. Ensures `winget`, then installs the core CLI tools: `bat`, `eza`, `delta`,
-   `fzf`, `zoxide`, `ripgrep`, `fd`, a Nerd Font and `gsudo`.
-4. Authenticates `gh`, installs 1Password and configures its SSH agent pipe.
-5. Clones `dotfiles` and `ai-harness`, then links the Windows-safe configs.
-6. Installs runtimes through `mise`. `fnm` and `bun` are installed only if `mise` fails.
-7. Installs Codex CLI, Claude Code and Ollama, generates Codex tab completion
+2. Applies safe Windows settings: long paths, Developer Mode, file
+   extensions, full path in the Explorer title, Explorer opening This PC,
+   clipboard history and tips off.
+3. Installs pending security and quality updates without feature upgrades or an automatic reboot.
+4. Ensures `winget`, then installs the core CLI tools: `bat`, `eza`, `delta`,
+   `fzf`, `zoxide`, `ripgrep`, `fd`, `jq`, `ffmpeg`, the cloud and Kubernetes
+   CLIs, a Nerd Font and `gsudo`.
+5. Authenticates `gh`, installs 1Password and configures its SSH agent pipe.
+6. Clones `dotfiles` and `ai-harness`, then links the Windows-safe configs.
+7. Installs runtimes through `mise`. `fnm` and `bun` are installed only if `mise` fails.
+8. Installs the PowerShell module bundle: `PSFzf` for fuzzy history and files,
+   and `Terminal-Icons` for icons in `Get-ChildItem`.
+9. Installs Codex CLI, Claude Code and Ollama, generates Codex tab completion
    and prompts for auth unless you pass `-Yes`.
-8. Installs the GUI apps from `config/packages.txt`.
-9. Verifies the result and prints the remaining manual actions.
+10. Installs the GUI apps from `config/packages.txt`.
+11. Verifies the result and prints the remaining manual actions.
+
+A full run downloads several GB. The macOS to Windows mapping, including
+what is optional and what has no equivalent, is in
+`knowledge/windows-equivalents.md`.
 
 ## Safety
 
 Each step converges on re-run. An overwritten config is copied to
 `<path>.bak.<timestamp>` first. The bootstrap never deletes user data and
 never reboots automatically.
+
+## Logs and audit
+
+Every run writes under `%LOCALAPPDATA%\oli-windows`:
+
+- `bootstrap.log`: append-only history across all runs.
+- `errors.log`: every ERROR line, so a failure is one file away.
+- `logs\<runid>-bootstrap.log`: one file per run, rotated to the last 30.
+- `runs\<runid>.json`: plan, per-step status, seconds and the machine facts.
+
+The run summary is written on success and on failure. Open the folder with
+`logs` in a new terminal, or run `doctor` for update diagnosis plus pending
+package updates.
+
+## Admin prompts
+
+UAC stays on. The bootstrap does not disable it. `gsudo` is installed and
+configured to cache one elevated session for 30 minutes, so a burst of admin
+commands asks once. `sudo <command>` in a new terminal uses that cache.
 
 ## Related repos
 

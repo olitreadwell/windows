@@ -111,4 +111,5 @@ else {
 & git config --global user.name 'olitreadwell'
 & git config --global user.email 'oliver.treadwell@gmail.com'
 & git config --global credential.helper manager
+& git config --global core.longpaths true
 Write-Ok 'git identity and credential helper set'

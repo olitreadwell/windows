@@ -38,6 +38,7 @@ $required = @(
     'docs/new-machine-runbook.md',
     'knowledge/decisions.md',
     'knowledge/hardware.md',
+    'knowledge/windows-equivalents.md',
     'knowledge/windows-10-eol.md',
     'knowledge/migration-map.md',
     'scripts/Diagnose-WindowsUpdate.ps1',
@@ -85,8 +86,9 @@ foreach ($name in $generations.Keys) {
 $plan = @(Get-StepPlan -RepoRoot $repoRoot)
 if ($plan.Count -eq 0) { Add-Failure 'empty step plan' }
 $expectedSteps = @(
-    '10-preflight', '15-updates', '20-winget', '25-core-tools', '30-auth',
-    '35-1password', '40-dotfiles', '45-runtimes', '50-ai-tools', '60-apps',
+    '10-preflight', '12-settings', '15-updates', '20-winget',
+    '25-core-tools', '30-auth', '35-1password', '40-dotfiles',
+    '45-runtimes', '47-pwsh-modules', '50-ai-tools', '60-apps',
     '65-repos', '90-verify'
 )
 if (($plan -join ',') -ne ($expectedSteps -join ',')) {
@@ -101,7 +103,7 @@ if ($from.Count -eq 0 -or $from[0] -ne '40-dotfiles') { Add-Failure '-From filte
 
 $core = @(Get-PackageSection -Path (Join-Path $repoRoot 'config/packages.txt') -Section 'core')
 if ($core.Count -eq 0) { Add-Failure 'no [core] packages' }
-foreach ($id in @('sharkdp.bat', 'eza-community.eza', 'dandavison.delta', 'DEVCOM.JetBrainsMonoNerdFont')) {
+foreach ($id in @('sharkdp.bat', 'eza-community.eza', 'dandavison.delta', 'DEVCOM.JetBrainsMonoNerdFont', 'jqlang.jq', 'Kubernetes.kubectl', 'Microsoft.AzureCLI', 'JesseDuffield.lazygit', 'sxyazi.yazi')) {
     if ($core -notcontains $id) { Add-Failure ("core packages missing: {0}" -f $id) }
 }
 
@@ -113,6 +115,9 @@ foreach ($id in @('OpenAI.Codex', 'Anthropic.ClaudeCode', 'Ollama.Ollama')) {
 
 $apps = @(Get-PackageSection -Path (Join-Path $repoRoot 'config/packages.txt') -Section 'apps')
 if ($apps.Count -eq 0) { Add-Failure 'no [apps] packages' }
+foreach ($id in @('voidtools.Everything', 'ShareX.ShareX', 'Microsoft.PowerToys')) {
+    if ($apps -notcontains $id) { Add-Failure ("apps missing: {0}" -f $id) }
+}
 
 foreach ($id in @($core + $ai + $apps)) {
     if ($id -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]+$') { Add-Failure ("bad winget id: {0}" -f $id) }
@@ -122,8 +127,18 @@ $bootstrapText = Get-Content -Path (Join-Path $repoRoot 'bootstrap.ps1') -Raw
 if ($bootstrapText -notmatch 'SkipUpdates') { Add-Failure 'bootstrap.ps1 has no -SkipUpdates switch' }
 
 $profileText = Get-Content -Path (Join-Path $repoRoot 'config/profile/Microsoft.PowerShell_profile.ps1') -Raw
-foreach ($needle in @('eza', 'Get-Command bat', 'delta', 'fcd', 'function update', '.codex\completions.ps1', 'Ctrl+t', 'Ctrl+r')) {
+foreach ($needle in @('eza', 'Get-Command bat', 'delta', 'fcd', 'function update', 'function logs', 'function doctor', '.codex\completions.ps1', 'PSFzf', 'Terminal-Icons', 'Ctrl+t', 'Ctrl+r')) {
     if ($profileText -notmatch [regex]::Escape($needle)) { Add-Failure ("profile missing: {0}" -f $needle) }
+}
+
+$logText = Get-Content -Path (Join-Path $repoRoot 'core/Log.ps1') -Raw
+foreach ($needle in @('errors.log', 'Save-RunSummary', 'OliRunId')) {
+    if ($logText -notmatch [regex]::Escape($needle)) { Add-Failure ("Log.ps1 missing: {0}" -f $needle) }
+}
+
+$settingsText = Get-Content -Path (Join-Path $repoRoot 'steps/12-settings.ps1') -Raw
+foreach ($needle in @('LongPathsEnabled', 'AllowDevelopmentWithoutDevLicense', 'EnableClipboardHistory', 'LaunchTo')) {
+    if ($settingsText -notmatch [regex]::Escape($needle)) { Add-Failure ("settings step missing: {0}" -f $needle) }
 }
 
 $macPath = Get-ChildItem -Path $repoRoot -Recurse -Filter '*.ps1' -File | Where-Object { $_.FullName -ne $PSCommandPath } | Select-String -Pattern '/Users/olitreadwell' -SimpleMatch -ErrorAction SilentlyContinue
