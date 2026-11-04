@@ -54,13 +54,16 @@ function Get-MachineInfo {
 
     $blockers = @()
     if ($build -ge 22000) {
-        $support = 'windows-11'
+        $family = 'windows-11'
+        $support = 'supported-build'
     }
     else {
-        $support = 'windows-10-out-of-support'
-        if ($cpuGeneration -lt 8) { $blockers += "CPU generation $cpuGeneration (Windows 11 needs 8th gen or newer)" }
+        $family = 'windows-10'
+        $support = 'out-of-support-build'
+        if ($cpuGeneration -lt 1) { $blockers += 'CPU model not recognized; check the Microsoft supported CPU list' }
+        elseif ($cpuGeneration -lt 8) { $blockers += "CPU generation $cpuGeneration (Windows 11 needs 8th gen or newer)" }
         if (-not $tpmEnabled) { $blockers += 'TPM 2.0 not detected or not enabled' }
-        if ($secureBoot -eq $false) { $blockers += 'Secure Boot appears off' }
+        if ($secureBoot -ne $true) { $blockers += 'Secure Boot not confirmed' }
         if ($ramGb -lt 4) { $blockers += 'Less than 4 GB RAM' }
         if ($freeGb -lt 64) { $blockers += 'Less than 64 GB free on the system drive' }
     }
@@ -87,6 +90,7 @@ function Get-MachineInfo {
         SecureBoot          = $secureBoot
         BatteryCount        = $batteries.Count
         BatteryPercent      = $batteryPercent
+        WindowsFamily       = $family
         WindowsSupport      = $support
         Windows11Blockers   = $blockers
         Windows11Likely     = ($blockers.Count -eq 0)

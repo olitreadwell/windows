@@ -1,9 +1,14 @@
-# Windows Update. Installs pending updates but never reboots automatically.
+# Windows Update. Installs security and quality updates. Feature upgrades,
+# including Windows 11, stay a human decision.
 Set-StrictMode -Version 2.0
 
 if (-not (Test-IsAdmin)) {
     Write-Warn 'Windows Update needs admin. Run from an elevated shell.'
     return
+}
+
+if (Test-RebootPending) {
+    Write-Fail 'A restart is already pending. Restart, then run: .\bootstrap.ps1 -From 15-updates'
 }
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -33,13 +38,38 @@ if (-not (Get-Command Get-WindowsUpdate -ErrorAction SilentlyContinue)) {
     return
 }
 
-$pending = @(Get-WindowsUpdate -ErrorAction SilentlyContinue)
-if ($pending.Count -eq 0) {
-    Write-Ok 'no pending Windows updates'
+$upgrades = @()
+try {
+    $upgrades = @(Get-WindowsUpdate -Category 'Upgrades' -ErrorAction Stop)
+}
+catch {
+    Write-Warn ("upgrade query failed: {0}" -f $_.Exception.Message)
+}
+
+if ($upgrades.Count -gt 0) {
+    Write-Warn ("{0} feature upgrade(s) are offered. This script will not install them." -f $upgrades.Count)
+    Write-Warn 'Upgrade to Windows 11 deliberately with the Installation Assistant after these updates.'
+}
+
+$pending = @()
+try {
+    $pending = @(Get-WindowsUpdate -NotCategory 'Upgrades', 'Feature Packs' -ErrorAction Stop)
+}
+catch {
+    Write-Warn ("Windows Update query failed: {0}" -f $_.Exception.Message)
+    Write-Warn 'Use Settings > Windows Update manually.'
     return
 }
 
-Write-Log ("{0} update(s) pending; installing without automatic reboot" -f $pending.Count)
-Install-WindowsUpdate -AcceptAll -IgnoreReboot -Confirm:$false -ErrorAction Continue
-Write-Warn 'Some updates need a restart. Restart before running the next step.'
-Write-Log 'resume: .\bootstrap.ps1 -From 20-winget'
+if ($pending.Count -eq 0) {
+    Write-Ok 'no pending security or quality updates'
+    return
+}
+
+Write-Log ("{0} update(s) pending; installing without feature upgrades or automatic reboot" -f $pending.Count)
+Install-WindowsUpdate -NotCategory 'Upgrades', 'Feature Packs' -AcceptAll -IgnoreReboot -Confirm:$false -ErrorAction Continue
+
+if (Test-RebootPending) {
+    Write-Fail 'Update installed and a restart is pending. Restart, then run: .\bootstrap.ps1 -From 15-updates'
+}
+Write-Ok 'updates installed and no restart is pending'

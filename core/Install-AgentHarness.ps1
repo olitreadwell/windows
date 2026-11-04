@@ -11,6 +11,11 @@ function Install-AgentHarness {
         return
     }
 
+    foreach ($requiredDir in @('.codex', '.claude')) {
+        $path = Join-Path $HOME $requiredDir
+        if (-not (Test-Path $path)) { New-Item -ItemType Directory -Path $path -Force | Out-Null }
+    }
+
     $toolSkillDirs = @(
         '.claude\skills',
         '.codex\skills',

@@ -1,4 +1,4 @@
-# Personal repos cloned into ~/code by step 45-repos.sh.
+# Personal repos cloned into ~/code by step 65-repos.ps1.
 # One repo name per line; # starts a comment. Add new repos here.
 # OSS forks (react-spectrum, aws-cdk, uswds, etc.) deliberately excluded  - 
 # contribution work, not needed on the new machine.

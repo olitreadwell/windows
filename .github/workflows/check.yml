@@ -14,9 +14,17 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Parse and test
+      - name: Test on Windows PowerShell 5.1
+        shell: powershell
+        run: .\tests\run.ps1
+
+      - name: Dry run on Windows PowerShell 5.1
+        shell: powershell
+        run: .\bootstrap.ps1 -DryRun
+
+      - name: Test on PowerShell 7
         shell: pwsh
-        run: ./tests/run.ps1
+        run: .\tests\run.ps1
 
       - name: PSScriptAnalyzer
         shell: pwsh

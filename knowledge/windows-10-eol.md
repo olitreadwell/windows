@@ -16,9 +16,11 @@ security fixes, feature updates or technical support without ESU.
 
 ## Consumer ESU
 
-Any personal Windows 10 22H2 device is eligible in most markets. Enrol from
-Settings > Update & Security > Windows Update. The three enrolment routes
-are:
+Eligibility is narrower than "any Windows 10 device". It needs Windows 10
+22H2 with the latest updates and KB5126256, an administrator Microsoft
+account that is not a child account, and a personal device that is not
+kiosk, domain joined, Entra joined or MDM managed. Enrol from Settings >
+Update & Security > Windows Update. The three enrolment routes are:
 
 - No extra cost when PC settings sync through a Microsoft account.
 - 1,000 Microsoft Rewards points.
@@ -30,9 +32,12 @@ support beyond activation help.
 
 ## What this means for the Surface Book
 
+This machine has an i7-8650U, which meets the Windows 11 CPU requirement.
+Upgrade to Windows 11 rather than buying ESU. Keep ESU as the fallback if the
+upgrade fails.
+
 The machine must not browse the internet, read email or run agents while it
-is an unpatched Windows 10 install. Enrol in ESU first, or install Windows 11
-if the CPU allows it.
+is an unpatched Windows 10 install.
 
 The bootstrap does not enrol in ESU. Enrolment needs a Microsoft account and
 a human decision. The preflight step reports the build and the blockers, and
@@ -51,4 +56,5 @@ The i5-7300U model cannot upgrade officially. The 8th generation models can.
 
 - <https://learn.microsoft.com/en-us/lifecycle/products/windows-10-home-and-pro>
 - <https://www.microsoft.com/en-us/windows/end-of-support>
+- <https://www.microsoft.com/en-us/windows/extended-security-updates>
 - <https://en.wikipedia.org/wiki/Surface_Book_2>

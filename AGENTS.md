@@ -14,7 +14,7 @@ first. It defines the two modes and the quality bar.
 - Steps are numbered PowerShell files in `steps/`; one concern per file.
   Order equals filename order.
 - Every step starts with `Set-StrictMode -Version 2.0`, uses the helpers
-  from `core/`, detects its own completion from system state, logs start and
+  from `core/`, converges from system state, logs start and
   end, and never deletes user data.
 - The entry point and every file it loads before `pwsh` exists must run on
   PowerShell 5.1. No ternaries, no null-coalescing, no `ForEach-Object
@@ -42,5 +42,6 @@ first. It defines the two modes and the quality bar.
 runs detection and planning, and checks the package list. CI runs the same
 gate on `windows-latest` plus PSScriptAnalyzer at error severity.
 
-The gate needs Windows. A macOS machine cannot run it; push and let CI prove
-the change.
+Live detection needs Windows. The parse and config checks run under any
+`pwsh`; CI runs the full gate under Windows PowerShell 5.1 and PowerShell 7
+on `windows-latest`.

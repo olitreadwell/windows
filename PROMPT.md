@@ -15,7 +15,7 @@ point, so an old Windows 10 install can run them before PowerShell 7 exists.
 Maintain a personal provisioning system that:
 
 - Sets up a Windows machine from zero to daily driver.
-- Is idempotent: safe to re-run, and every step detects its own completion.
+- Is idempotent: safe to re-run, and each step converges on its target state.
 - Fails safely: backs up before overwrite, never deletes user data, never
   reboots without the human.
 - Detects the machine: Windows version, CPU generation, TPM, Secure Boot,
@@ -32,12 +32,14 @@ Unknown until the first run. Fill this in from
 .\bootstrap.ps1 -Only 10-preflight
 ```
 
-Known context from the purchase date:
+Known context:
 
-- Surface Book 2, bought between 2017 and 2019. Either the 13.5 inch or 15
-  inch model. See `knowledge/hardware.md` for the variants.
-- Windows 10, possibly older than 22H2.
-- No recent Windows updates and no agent tooling.
+- Surface Book 2, bought between 2017 and 2019. Exact size unknown.
+- CPU: Intel Core i7-8650U, 8th generation. 16 GB RAM.
+- Windows 11 is officially supported. Upgrade before installing tools.
+- Windows 10 is the current state, possibly older than 22H2, with no recent
+  updates and no agent tooling.
+- Exact model and serial are recorded in local state, not in this public repo.
 
 ## Layout
 
@@ -70,10 +72,15 @@ windows/
   2027-10-12. Do not present an unpatched Windows 10 machine as supported.
 - Check Windows 11 eligibility from the detected CPU generation, TPM and
   Secure Boot state. Never claim eligibility without the detected facts.
-- Keep the entry point compatible with PowerShell 5.1. Use PowerShell 7
-  features only inside a step that runs after `pwsh` is installed.
+- Keep every step compatible with PowerShell 5.1. The runner does not
+  relaunch under PowerShell 7, so a 7-only step would fail inside the 5.1
+  host.
+- Exclude feature upgrades from Windows Update automation. Windows 11 is a
+  human decision.
 - Use `winget` as the package manager. Add a package only after checking its
   exact ID in the winget-pkgs repository.
+- Keep the ADR 7 exceptions explicit: PSWindowsUpdate, the App Installer
+  bootstrap, and `mise` runtimes. Do not add another non-winget installer.
 - Prefer a junction for a directory link and a hard link for a file link.
   Fall back to a copy when the filesystem refuses the link.
 - Steps run in filename order. One concern per file. A failing step stops the
@@ -94,6 +101,6 @@ A change is done when:
 
 - `.\tests\run.ps1` passes on Windows.
 - Every changed behaviour has a test, or the commit says `no test: <reason>`.
-- The step still detects its own completion.
+- The step converges when run again.
 - A re-run on a provisioned machine changes nothing.
 - Docs and knowledge are in the same commit.

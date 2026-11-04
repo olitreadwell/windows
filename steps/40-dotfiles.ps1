@@ -1,5 +1,7 @@
 # Clone dotfiles and ai-harness, then wire Windows-specific configs.
 Set-StrictMode -Version 2.0
+$env:GIT_TERMINAL_PROMPT = '0'
+$env:GCM_INTERACTIVE = 'Never'
 
 function Update-GitRepo {
     param(
@@ -8,7 +10,7 @@ function Update-GitRepo {
     )
 
     if (Test-Path (Join-Path $Destination '.git')) {
-        & git -C $Destination pull --ff-only origin main 2>$null | Out-Null
+        & git -c credential.interactive=false -C $Destination pull --ff-only origin main 2>$null | Out-Null
         if ($LASTEXITCODE -ne 0) { Write-Warn "pull failed: $Repo" }
         else { Write-Ok "updated: $Repo" }
         return
@@ -35,7 +37,7 @@ function Update-GitRepo {
     }
 
     if ($useGh) { & gh repo clone $Repo $Destination }
-    else { & git clone ("https://github.com/{0}.git" -f $Repo) $Destination }
+    else { & git -c credential.interactive=false clone ("https://github.com/{0}.git" -f $Repo) $Destination }
 
     if ($LASTEXITCODE -ne 0) { Write-Fail "clone failed: $Repo" }
     Write-Ok "cloned: $Repo"
@@ -53,10 +55,8 @@ Set-ManagedFile -Source (Join-Path $dotfiles 'dot_gitignore_global') -Destinatio
 Set-ManagedFile -Source (Join-Path $dotfiles 'gitmessage') -Destination (Join-Path $HOME '.gitmessage') | Out-Null
 Set-ManagedFile -Source (Join-Path $dotfiles 'dot_config/gh/config.yml') -Destination (Join-Path $HOME '.config/gh/config.yml') -CopyOnly | Out-Null
 
-$starshipSource = Join-Path $dotfiles 'dot_config/starship.dark.toml'
-if (Test-Path $starshipSource) {
-    Set-ManagedFile -Source $starshipSource -Destination (Join-Path $HOME '.config/starship.toml') | Out-Null
-}
+$starshipSource = Join-Path $global:OliRepoRoot 'config/starship.toml'
+Set-ManagedFile -Source $starshipSource -Destination (Join-Path $HOME '.config/starship.toml') | Out-Null
 
 Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'config/mise.toml') -Destination (Join-Path $HOME '.config/mise/config.toml') | Out-Null
 
@@ -86,17 +86,22 @@ if (-not (Test-Path $catalog)) {
 }
 
 $profileSource = Join-Path $global:OliRepoRoot 'config/profile/Microsoft.PowerShell_profile.ps1'
+$documents = [Environment]::GetFolderPath('MyDocuments')
 $profilePaths = @(
-    (Join-Path $HOME 'Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1'),
-    (Join-Path $HOME 'Documents/PowerShell/Microsoft.PowerShell_profile.ps1')
+    (Join-Path $documents 'WindowsPowerShell/Microsoft.PowerShell_profile.ps1'),
+    (Join-Path $documents 'PowerShell/Microsoft.PowerShell_profile.ps1')
 )
 foreach ($path in $profilePaths) {
     Set-ManagedFile -Source $profileSource -Destination $path | Out-Null
 }
 
 $syncScript = Join-Path $global:OliRepoRoot 'scripts/Sync-DefaultSkills.ps1'
-if ((Test-Path $syncScript) -and (Test-Path $codexConfig)) {
+$skillsDir = Join-Path $harness 'skills'
+if ((Test-Path $syncScript) -and (Test-Path $codexConfig) -and (Test-Path $skillsDir)) {
     & $syncScript -ConfigPath $codexConfig
+}
+else {
+    Write-Warn 'ai-harness skills are missing; skipped the default-skills sync'
 }
 
 & git config --global user.name 'olitreadwell'

@@ -20,7 +20,7 @@ Where each piece of the current setup goes. Status values:
 | `45-repos` | `65-repos` | Ported |
 | `50-shell` zsh and oh-my-zsh | PowerShell profile, Starship, PSReadLine | Adapted |
 | `55-macos-settings` | none yet | Deferred |
-| `60-runtimes` mise | `45-runtimes` mise, with uv, fnm and bun fallbacks | Adapted |
+| `60-runtimes` mise | `45-runtimes` mise. uv is core; fnm and bun are fallbacks only if mise fails | Adapted |
 | `70-apps` mas | `60-apps` winget | Adapted |
 | `75-apps-config` plist restore | none yet | Deferred |
 | `76-manual-apps` DMG installs | none yet | Deferred |
@@ -87,5 +87,5 @@ The harness installer is the strongest candidate to move upstream into
 3. No `codex` rule sync for the standing style beyond the config block.
 4. Native Codex on Windows may still prefer WSL. Verify with `codex --version`
    and a small `codex exec` run before relying on it.
-5. The model catalog is 217 KB, over the repo token limit, so it is fetched
-   from the public `laptop` repo at provision time.
+5. The model catalog is 217 KB, too large to carry in agent context, so it
+   is fetched from the public `laptop` repo at provision time.

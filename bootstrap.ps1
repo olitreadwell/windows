@@ -4,7 +4,7 @@
 Provision a Windows machine from zero to daily driver.
 
 .DESCRIPTION
-Runs numbered steps in order. Every step detects its own completion, so
+Runs numbered steps in order. Each step converges from system state, so
 re-running is safe. Nothing deletes user data; an overwritten config is
 backed up first.
 
@@ -40,6 +40,11 @@ $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 Initialize-Log -RepoRoot $repoRoot
 $global:OliAssumeYes = [bool]$Yes
 $global:OliDryRun = [bool]$DryRun
+
+# Old Windows 10 builds default to TLS 1.0, which GitHub rejects.
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$env:GIT_TERMINAL_PROMPT = '0'
+$env:GCM_INTERACTIVE = 'Never'
 
 $machine = Get-MachineInfo
 Write-Host ''

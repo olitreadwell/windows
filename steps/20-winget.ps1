@@ -17,6 +17,9 @@ else {
         Invoke-WebRequest -Uri 'https://aka.ms/getwinget' -OutFile $bundle -UseBasicParsing -ErrorAction Stop
         Add-AppxPackage -Path $bundle -ErrorAction Stop
         Update-SessionPath
+        if (-not (Test-CommandExists 'winget')) {
+            Write-Fail 'App Installer installed but winget is still not on PATH. Open a new terminal and re-run step 20.'
+        }
         Write-Ok 'winget installed'
     }
     catch {

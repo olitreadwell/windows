@@ -12,8 +12,6 @@ jdx.mise
 AgileBits.1Password
 AgileBits.1Password.CLI
 astral-sh.uv
-Schniz.fnm
-Oven-sh.Bun
 BurntSushi.ripgrep.MSVC
 sharkdp.fd
 junegunn.fzf
@@ -21,9 +19,10 @@ ajeetdsouza.zoxide
 7zip.7zip
 
 # [ai] are the agent CLIs. Auth stays interactive.
+# Anthropic.ClaudeCode is the CLI. Anthropic.Claude is the desktop app.
 [ai]
 OpenAI.Codex
-Anthropic.Claude
+Anthropic.ClaudeCode
 
 # [apps] are GUI apps. Keep this list short.
 [apps]

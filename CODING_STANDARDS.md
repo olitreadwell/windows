@@ -14,7 +14,7 @@ stricter rule. Read `AGENTS.md` for layout and scope.
 ## Commands
 
 - Full gate: `.\tests\run.ps1`
-- Run only on Windows. CI uses a `windows-latest` runner.
+- Live detection needs Windows. CI runs the gate under Windows PowerShell 5.1 and PowerShell 7 on `windows-latest`.
 
 ## Test-first in this repo
 

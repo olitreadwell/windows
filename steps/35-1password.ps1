@@ -1,6 +1,7 @@
 # 1Password app, CLI, and the SSH agent pipe.
 Set-StrictMode -Version 2.0
 
+$opReady = $false
 if (-not (Test-CommandExists 'op')) {
     Write-Warn 'op CLI is missing. Install AgileBits.1Password.CLI with winget.'
 }
@@ -8,6 +9,7 @@ else {
     Write-Ok ("op present: {0}" -f ((& op --version) -join ' '))
     & op account list 2>$null | Out-Null
     if ($LASTEXITCODE -eq 0) {
+        $opReady = $true
         Write-Ok '1Password CLI is signed in'
     }
     else {
@@ -30,25 +32,38 @@ $block = @(
 
 $existing = ''
 if (Test-Path $sshConfig) { $existing = Get-Content -Raw -LiteralPath $sshConfig }
-if ($existing -notmatch [regex]::Escape($begin)) {
-    if ($existing.Length -gt 0 -and -not $existing.EndsWith("`n")) { $existing += "`r`n" }
-    Set-Content -LiteralPath $sshConfig -Value ($existing + $block + "`r`n") -Encoding ASCII
-    Write-Ok 'ssh config: 1Password agent block added'
+
+$pattern = '(?s)' + [regex]::Escape($begin) + '.*?' + [regex]::Escape($end) + '\r?\n?'
+if ($existing -match [regex]::Escape($begin)) {
+    $updated = [regex]::Replace($existing, $pattern, ($block + "`r`n"))
 }
 else {
-    Write-Ok 'ssh config: 1Password agent block already present'
+    if ($existing.Length -gt 0 -and -not $existing.EndsWith("`n")) { $existing += "`r`n" }
+    $updated = $existing + $block + "`r`n"
 }
 
-# 1Password binds the system-wide OpenSSH agent pipe. Windows' own agent
-# must not hold it.
-$service = Get-Service -Name ssh-agent -ErrorAction SilentlyContinue
-if ($service) {
-    if ($service.Status -eq 'Running') {
-        Stop-Service -Name ssh-agent -Force -ErrorAction SilentlyContinue
-        Write-Ok 'stopped the Windows OpenSSH Authentication Agent service'
+if ($updated -eq $existing) {
+    Write-Ok 'ssh config: 1Password agent block already current'
+}
+else {
+    if (Test-Path $sshConfig) { $null = Backup-Path -Path $sshConfig }
+    [IO.File]::WriteAllText($sshConfig, $updated, (New-Object Text.UTF8Encoding($false)))
+    Write-Ok 'ssh config: 1Password agent block written'
+}
+
+# 1Password binds the system-wide OpenSSH agent pipe. Windows' own agent must
+# not hold it, but only change that once 1Password is actually usable.
+if ($opReady) {
+    $service = Get-Service -Name ssh-agent -ErrorAction SilentlyContinue
+    if ($service) {
+        if ($service.Status -eq 'Running') {
+            Stop-Service -Name ssh-agent -Force -ErrorAction SilentlyContinue
+            Write-Ok 'stopped the Windows OpenSSH Authentication Agent service'
+        }
+        Set-Service -Name ssh-agent -StartupType Disabled -ErrorAction SilentlyContinue
     }
-    Set-Service -Name ssh-agent -StartupType Disabled -ErrorAction SilentlyContinue
+    Write-Warn 'Enable Settings > Developer > SSH agent in 1Password before using git over SSH.'
 }
-
-Write-Warn 'Enable Settings > Developer > SSH agent in 1Password before using git over SSH.'
-Write-Warn 'Use HTTPS remotes until that is done; the bootstrap config uses HTTPS.'
+else {
+    Write-Warn 'Left the Windows OpenSSH Authentication Agent service alone until 1Password is signed in.'
+}

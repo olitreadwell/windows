@@ -3,19 +3,18 @@
 Do these in order. The bootstrap handles the repeatable parts; this page
 covers the decisions and the physical checks.
 
-## 1. Back up before touching anything
+## 1. Back up if there are files you care about
 
-Copy the user profile to an external drive or OneDrive. The bootstrap does
-not delete data, but a 2017 machine may have a failing drive.
+If the profile is empty, skip this. Otherwise copy it to an external drive:
 
 ```powershell
 $source = $env:USERPROFILE
-$target = 'E:\surface-book-backup'
+$target = Read-Host 'Backup drive and folder, for example D:\surface-book-backup'
 robocopy $source $target /E /XJ /R:1 /W:1 /LOG:"$env:TEMP\surface-backup.log"
 ```
 
-`/XJ` skips junctions so the copy does not loop. Read the summary at the end
-of the log.
+`/XJ` skips junctions so the copy does not loop. Check that `$target` exists
+and is the drive you mean before running it.
 
 ## 2. Inspect the hardware
 
@@ -30,21 +29,38 @@ An old Windows 10 build may have broken TLS, an old App Installer and no
 winget. Run Windows Update manually until it reports no more updates, and
 restart when asked. Then decide the support path:
 
-- Enrol in consumer ESU, which runs to 2027-10-12.
-- Or upgrade to Windows 11 if the CPU is 8th generation or newer.
+- Upgrade to Windows 11. This machine has an i7-8650U, so it is supported.
+- Or enrol in consumer ESU, which runs to 2027-10-12. ESU requires Windows 10
+  22H2 with the latest updates and KB5126256, an administrator Microsoft
+  account that is not a child account, and a personal device that is not
+  kiosk, domain joined, Entra joined or MDM managed.
 - Or keep the machine offline.
 
 Do not browse, read email or run agents on an unpatched Windows 10 install.
 
-## 4. Clone the repo
+## 4. Get the repo without git
+
+The machine probably has no git. Download the ZIP instead:
 
 ```powershell
-git clone https://github.com/olitreadwell/windows "$HOME\windows"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$zip = Join-Path $env:TEMP 'windows-main.zip'
+Invoke-WebRequest -Uri 'https://github.com/olitreadwell/windows/archive/refs/heads/main.zip' -OutFile $zip -UseBasicParsing
+Expand-Archive -Path $zip -DestinationPath $HOME -Force
+if (Test-Path "$HOME\windows") { Move-Item "$HOME\windows" "$HOME\windows.bak.$(Get-Date -Format 'yyyyMMddHHmmss')" }
+Rename-Item "$HOME\windows-main" "$HOME\windows"
 Set-Location "$HOME\windows"
 ```
 
-If `git` is missing, install Git for Windows from
-<https://git-scm.com/download/win>.
+If git is already installed, this works too:
+
+```powershell
+git clone https://github.com/olitreadwell/windows "$HOME\windows"
+```
+
+The bootstrap installs Git for Windows at step 25, then clones `dotfiles`
+and `ai-harness` at step 40. A ZIP copy has no `.git`, so update it by
+downloading the ZIP again.
 
 ## 5. Preview the plan
 
@@ -62,24 +78,30 @@ Read the step list. The first run starts at `10-preflight`.
 .\bootstrap.ps1
 ```
 
-Expect one or two restarts for Windows updates. Resume with:
+Expect one or two restarts for Windows updates. After each restart, resume
+with:
 
 ```powershell
-.\bootstrap.ps1 -From 20-winget
+.\bootstrap.ps1 -From 15-updates
 ```
+
+Repeat until it reports no pending updates, then continue with
+`.\bootstrap.ps1 -From 20-winget`.
 
 ## 7. Finish the human steps
 
 - Sign in to 1Password, then enable Settings > Developer > SSH agent.
-- Run `gh auth status`, `codex login`, `claude auth login`.
+- Set `OLLAMA_CLOUD_MAX_API_KEY` for Codex if it was not entered during step
+  50. Get the key from 1Password on the Mac.
+- Run `gh auth status` and `claude auth login`.
 - Open a new PowerShell 7 window and check `starship --version` and
   `mise ls`.
 - Restart once more so PATH changes reach every app.
 
 ## 8. Record the machine
 
-Copy the real values into `knowledge/current-machine.md` and commit them.
-This is what a future agent reads before changing the plan.
+Copy the non-identifying values into `knowledge/current-machine.md` and
+commit them. Keep the serial number in local state only. This repo is public.
 
 ## If something fails
 

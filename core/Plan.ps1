@@ -9,7 +9,7 @@ function Get-StepPlan {
     )
 
     $stepsDir = Join-Path $RepoRoot 'steps'
-    $steps = @(Get-ChildItem -Path $stepsDir -Filter '*.ps1' | Sort-Object Name | ForEach-Object { $_.BaseName })
+    $steps = @(Get-ChildItem -Path $stepsDir -Filter '*.ps1' | Sort-Object { [int](($_.BaseName -split '-')[0]) } | ForEach-Object { $_.BaseName })
 
     if ($Only) {
         return @($steps | Where-Object { $_ -eq $Only })

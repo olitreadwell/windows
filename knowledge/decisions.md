@@ -14,9 +14,10 @@ fork every step, break the macOS gate on main, and force both loops to share
 one history. A fork has the same drift problem and cannot be private in the
 same way.
 
-Decision: `olitreadwell/windows` is a separate private repo. It keeps the
-step pattern and links to `laptop`, `dotfiles` and `ai-harness` as upstream
-sources.
+Decision: `olitreadwell/windows` is a separate public repo. Private-repo
+GitHub Actions is blocked by the account billing state, and the content has
+no secrets. It keeps the step pattern and links to `laptop`, `dotfiles` and
+`ai-harness` as upstream sources.
 
 ## ADR 2: PowerShell 5.1 at the entry point
 
@@ -26,8 +27,8 @@ The target machine may not have PowerShell 7. `bootstrap.ps1` and every file
 it loads before `pwsh` is installed must run on Windows PowerShell 5.1.
 
 Decision: no ternary operator, no null-coalescing, no `-Parallel`, no
-PowerShell 7-only modules in the pre-`pwsh` path. Later steps may use 7 once
-it exists.
+PowerShell 7-only modules. The runner never relaunches under `pwsh`, so every
+step runs in the 5.1 host.
 
 ## ADR 3: winget is the package manager
 
@@ -70,6 +71,19 @@ Status: accepted, 2026-11-05.
 Windows updates and ESU enrolment need human decisions: a reboot can lose
 work, and ESU needs a Microsoft account and a payment or rewards choice.
 
-Decision: the bootstrap installs updates with `-IgnoreReboot`, reports that a
-restart is needed, and leaves ESU enrolment to the runbook. It never reboots
-and never claims the machine is supported.
+Decision: the bootstrap installs security and quality updates with
+`-IgnoreReboot`, excludes `Upgrades` and `Feature Packs`, stops when a
+restart is pending, and leaves ESU enrolment and the Windows 11 upgrade to
+the runbook. It never reboots and never claims hardware eligibility.
+
+## ADR 7: Non-winget tools are explicit exceptions
+
+Status: accepted, 2026-11-05.
+
+Three installs cannot come from winget: the Windows Update PowerShell module
+(`PSWindowsUpdate` from PSGallery), the App Installer bootstrap needed to get
+winget on an old build, and runtime versions managed by `mise`. These are
+toolchain exceptions, not package installs.
+
+Decision: they stay explicit and logged. Do not add another non-winget
+installer without an ADR.

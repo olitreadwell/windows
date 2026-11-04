@@ -21,8 +21,18 @@ function Get-PackageSection {
     return $packages
 }
 
+function Test-WingetAvailable {
+    if (-not (Test-CommandExists 'winget')) {
+        Write-Warn 'winget is not on PATH. Install App Installer, then re-run 20-winget.'
+        return $false
+    }
+    return $true
+}
+
 function Test-WingetPackage {
     param([Parameter(Mandatory = $true)][string]$Id)
+
+    if (-not (Test-WingetAvailable)) { return $false }
 
     $output = & winget list --id $Id --exact --accept-source-agreements 2>$null
     if ($LASTEXITCODE -ne 0) { return $false }
@@ -36,6 +46,7 @@ function Install-WingetPackage {
     )
 
     if (-not $Name) { $Name = $Id }
+    if (-not (Test-WingetAvailable)) { return $false }
 
     if (Test-WingetPackage -Id $Id) {
         Write-Log "already installed: $Name ($Id)"
@@ -43,7 +54,7 @@ function Install-WingetPackage {
     }
 
     Write-Log "installing: $Name ($Id)"
-    & winget install --id $Id --exact --silent --accept-source-agreements --accept-package-agreements
+    & winget install --id $Id --exact --silent --disable-interactivity --accept-source-agreements --accept-package-agreements
     if ($LASTEXITCODE -ne 0) {
         Write-Warn "winget failed: $Name ($Id) exit $LASTEXITCODE"
         return $false

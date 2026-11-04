@@ -1,7 +1,7 @@
 # Final check: what works now, and what still needs a human.
 Set-StrictMode -Version 2.0
 
-$required = @('winget', 'git', 'gh', 'op', 'pwsh', 'mise')
+$required = @('winget', 'git', 'gh', 'op', 'pwsh', 'mise', 'codex', 'claude')
 $missing = @()
 foreach ($tool in $required) {
     if (Test-CommandExists $tool) {
@@ -30,6 +30,7 @@ if (Test-Path $skill) {
 }
 else {
     Write-Warn 'ai-harness skills are not linked into .claude/skills'
+    $missing += 'ai-harness skills'
 }
 
 $info = Get-MachineInfo
@@ -41,8 +42,9 @@ Write-Host ''
 Write-Host 'Next actions for a human:' -ForegroundColor Cyan
 Write-Host '  1. Restart Windows if updates asked for it.'
 Write-Host '  2. Sign in to 1Password and enable Developer > SSH agent.'
-Write-Host '  3. Run: gh auth status; codex login; claude auth login'
-Write-Host '  4. Open a new PowerShell 7 window and run: starship --version; mise ls'
+Write-Host '  3. Run: gh auth status; claude auth login'
+Write-Host '  4. Set OLLAMA_CLOUD_MAX_API_KEY for Codex if it is missing.'
+Write-Host '  5. Open a new PowerShell 7 window and run: starship --version; mise ls'
 Write-Host ''
 if ($missing.Count -gt 0) {
     Write-Fail ("verification missing: {0}" -f ($missing -join ', '))

@@ -13,3 +13,9 @@ sandbox_mode = "danger-full-access"
 web_search = "disabled"
 
 # network_access = "enabled"
+
+[model_providers.ollama-cloud]
+name = "Ollama Cloud Max"
+base_url = "https://ollama.com/v1"
+env_key = "OLLAMA_CLOUD_MAX_API_KEY"
+wire_api = "responses"

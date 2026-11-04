@@ -12,11 +12,22 @@ if (-not (Test-Path $configPath)) {
     return
 }
 
-& mise trust $configPath 2>$null | Out-Null
-& mise install
-if ($LASTEXITCODE -ne 0) {
-    Write-Warn 'mise install failed on this machine.'
-    Write-Warn 'Fallback: uv python install 3.14; fnm install --lts; bun --version'
+Push-Location $HOME
+try {
+    & mise trust $configPath 2>$null | Out-Null
+    & mise install
+    $miseExit = $LASTEXITCODE
+}
+finally {
+    Pop-Location
+}
+
+if ($miseExit -ne 0) {
+    Write-Warn 'mise install failed on this machine. Installing the fallbacks.'
+    Install-WingetPackage -Id 'Schniz.fnm' | Out-Null
+    Install-WingetPackage -Id 'Oven-sh.Bun' | Out-Null
+    Write-Warn 'Run: fnm install --lts'
+    Write-Warn 'Then check: bun --version; uv --version'
     return
 }
 

@@ -15,7 +15,6 @@
 	defaultRemote = origin
 [pull]
 	rebase = true
-	ff = only
 [merge]
 	ff = false
 	conflictstyle = diff3
@@ -60,7 +59,6 @@
 	dc = diff --cached
 	ds = diff --staged
 	dw = diff --word-diff
-	rh = reset --hard
 	rs = reset --soft
 	rm = reset --mixed
 	r1 = reset HEAD~1

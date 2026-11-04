@@ -6,7 +6,7 @@ $stateDir = Get-StateDir
 $info | ConvertTo-Json -Depth 6 | Set-Content -Path (Join-Path $stateDir 'system-info.json') -Encoding UTF8
 
 Write-Ok ("recorded machine: {0} {1} / {2}" -f $info.Manufacturer, $info.Model, $info.CpuName)
-Write-Log ("windows support: {0}" -f $info.WindowsSupport)
+Write-Log ("windows family: {0}; build support: {1}" -f $info.WindowsFamily, $info.WindowsSupport)
 
 if ($info.SystemDriveFreeGb -lt 20) {
     Write-Warn ("only {0} GB free on {1}:. Windows updates need room." -f $info.SystemDriveFreeGb, $env:SystemDrive)

@@ -1,7 +1,9 @@
 # Current machine
 
-Unknown until the first run. This file is the hand-written summary; the raw
-facts live outside git at `%LOCALAPPDATA%\oli-windows\system-info.json`.
+Filled in from the known facts and the first preflight run. The raw facts
+live outside git at `%LOCALAPPDATA%\oli-windows\system-info.json`.
+
+Do not commit the serial number. This repo is public.
 
 Run this on the Windows machine:
 
@@ -14,25 +16,25 @@ Then replace the placeholders below.
 
 ## Identity
 
-- Model:
-- Serial number:
-- Purchase year:
-- Windows edition and build:
-- Display version:
+- Model: Surface Book 2, size unknown
+- Serial number: local state only
+- Purchase year: between 2017 and 2019
+- Windows edition and build: unknown until preflight
+- Display version: unknown until preflight
 
 ## Hardware
 
-- CPU:
-- CPU generation:
-- RAM:
+- CPU: Intel Core i7-8650U
+- CPU generation: 8th
+- RAM: 16 GB
 - System drive free space:
 - GPU:
 - Battery count and health:
 
 ## Platform state
 
-- Windows 10 ESU enrolled: no
-- Windows 11 eligible: unknown
+- Windows 10 ESU enrolled: unknown
+- Windows 11 eligible: likely, pending TPM and Secure Boot check
 - TPM 2.0:
 - Secure Boot:
 - Admin account available:

@@ -23,7 +23,8 @@ function Backup-Path {
     param([Parameter(Mandatory = $true)][string]$Path)
 
     if (-not (Test-Path -LiteralPath $Path)) { return $null }
-    $backup = "$Path.bak.$(Get-Date -Format 'yyyyMMddHHmmss')"
+    $backup = "$Path.bak.$(Get-Date -Format 'yyyyMMddHHmmssfff')"
+    if (Test-Path -LiteralPath $backup) { $backup = "$backup-$PID" }
     $item = Get-Item -LiteralPath $Path -Force
     if ($item.PSIsContainer) {
         Copy-Item -LiteralPath $Path -Destination $backup -Recurse -Force
@@ -33,6 +34,33 @@ function Backup-Path {
     }
     Write-Log "backed up: $Path -> $backup"
     return $backup
+}
+
+function Test-LinkTarget {
+    param(
+        [Parameter(Mandatory = $true)]$Item,
+        [Parameter(Mandatory = $true)][string]$SourcePath
+    )
+
+    foreach ($target in @($Item.Target)) {
+        if (-not $target) { continue }
+        try {
+            if ((Resolve-Path -LiteralPath $target -ErrorAction Stop).Path -eq $SourcePath) { return $true }
+        }
+        catch { Write-Verbose "dangling link target: $target" }
+    }
+    return $false
+}
+
+function Test-RebootPending {
+    $paths = @(
+        'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending',
+        'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired'
+    )
+    foreach ($path in $paths) {
+        if (Test-Path $path) { return $true }
+    }
+    return $false
 }
 
 function Remove-ManagedPath {
@@ -72,8 +100,7 @@ function Set-ManagedFile {
     if (Test-Path -LiteralPath $Destination) {
         $item = Get-Item -LiteralPath $Destination -Force
         if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) {
-            $target = @($item.Target)[0]
-            if ($target -and ((Resolve-Path -LiteralPath $target).Path -eq $sourcePath)) { return $true }
+            if (Test-LinkTarget -Item $item -SourcePath $sourcePath) { return $true }
             Remove-ManagedPath -Path $Destination
         }
         elseif (-not $item.PSIsContainer) {
@@ -133,8 +160,7 @@ function Set-ManagedDirectory {
     if (Test-Path -LiteralPath $Destination) {
         $item = Get-Item -LiteralPath $Destination -Force
         if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) {
-            $target = @($item.Target)[0]
-            if ($target -and ((Resolve-Path -LiteralPath $target).Path -eq $sourcePath)) { return $true }
+            if (Test-LinkTarget -Item $item -SourcePath $sourcePath) { return $true }
             Remove-ManagedPath -Path $Destination
         }
         else {
@@ -146,9 +172,21 @@ function Set-ManagedDirectory {
     $parent = Split-Path -Parent $Destination
     if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
 
-    New-Item -ItemType Junction -Path $Destination -Target $sourcePath | Out-Null
-    Write-Ok "junction: $Destination"
-    return $true
+    try {
+        New-Item -ItemType Junction -Path $Destination -Target $sourcePath -ErrorAction Stop | Out-Null
+        $created = Get-Item -LiteralPath $Destination -Force -ErrorAction Stop
+        if (-not (Test-LinkTarget -Item $created -SourcePath $sourcePath)) {
+            throw 'junction did not point at the source'
+        }
+        Write-Ok "junction: $Destination"
+        return $true
+    }
+    catch {
+        Write-Verbose "junction unavailable: $Destination"
+        Copy-Item -LiteralPath $sourcePath -Destination $Destination -Recurse -Force
+        Write-Ok "copied (junction unavailable): $Destination"
+        return $true
+    }
 }
 
 function Update-SessionPath {
