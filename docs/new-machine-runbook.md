@@ -93,8 +93,12 @@ downloading the ZIP again.
 Open PowerShell as Administrator, then:
 
 ```powershell
+Set-ExecutionPolicy -Scope Process Bypass -Force
 .\bootstrap.ps1 -DryRun
 ```
+
+The default execution policy on a fresh Windows 10 install refuses to run
+`.ps1` files. `Process` scope lasts for this window only.
 
 Read the step list. The first run starts at `10-preflight`.
 

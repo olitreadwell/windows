@@ -35,6 +35,15 @@ to Windows 11 or enrol in ESU.
 The Surface Book may have no git and no winget. Use the ZIP path first; it
 needs only PowerShell 5.1 and an internet connection.
 
+A fresh Windows 10 install blocks `.ps1` files with "running scripts is
+disabled on this system". Either start the script through
+`powershell -ExecutionPolicy Bypass -File ...`, or unlock the current window
+only:
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass -Force
+```
+
 Run in an elevated PowerShell window:
 
 ```powershell
