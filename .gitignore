@@ -2,3 +2,5 @@ state/
 *.log
 *.bak.*
 knowledge/current-machine.generated.json
+# The repo tracks a Windows template even though dotfiles ignore live mise configs.
+!config/mise.toml

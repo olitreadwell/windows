@@ -1,0 +1,7 @@
+# Windows subset of dotfiles/dot_config/mise/config.toml.
+# Ruby and shellcheck are left out: their Windows support is unreliable.
+[tools]
+bun = "latest"
+node = "lts"
+python = "3.14.7"
+dotnet = "10.0.401"

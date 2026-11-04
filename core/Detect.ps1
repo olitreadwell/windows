@@ -46,6 +46,10 @@ function Get-MachineInfo {
     try { $secureBoot = [bool](Confirm-SecureBootUEFI -ErrorAction Stop) } catch { Write-Verbose 'Secure Boot query unavailable' }
 
     $batteries = @(Get-CimInstance Win32_Battery -ErrorAction SilentlyContinue)
+    $batteryPercent = $null
+    if ($batteries.Count -gt 0 -and $batteries[0].PSObject.Properties['EstimatedChargeRemaining']) {
+        $batteryPercent = $batteries[0].EstimatedChargeRemaining
+    }
     $cpuGeneration = Get-CpuGeneration -Name $cpu.Name
 
     $blockers = @()
@@ -82,7 +86,7 @@ function Get-MachineInfo {
         TpmEnabled          = $tpmEnabled
         SecureBoot          = $secureBoot
         BatteryCount        = $batteries.Count
-        BatteryPercent      = ($batteries | Select-Object -First 1).EstimatedChargeRemaining
+        BatteryPercent      = $batteryPercent
         WindowsSupport      = $support
         Windows11Blockers   = $blockers
         Windows11Likely     = ($blockers.Count -eq 0)
