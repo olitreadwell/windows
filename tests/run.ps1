@@ -107,6 +107,9 @@ foreach ($id in @('sharkdp.bat', 'eza-community.eza', 'dandavison.delta', 'DEVCO
 
 $ai = @(Get-PackageSection -Path (Join-Path $repoRoot 'config/packages.txt') -Section 'ai')
 if ($ai.Count -eq 0) { Add-Failure 'no [ai] packages' }
+foreach ($id in @('OpenAI.Codex', 'Anthropic.ClaudeCode', 'Ollama.Ollama')) {
+    if ($ai -notcontains $id) { Add-Failure ("ai packages missing: {0}" -f $id) }
+}
 
 $apps = @(Get-PackageSection -Path (Join-Path $repoRoot 'config/packages.txt') -Section 'apps')
 if ($apps.Count -eq 0) { Add-Failure 'no [apps] packages' }
@@ -119,7 +122,7 @@ $bootstrapText = Get-Content -Path (Join-Path $repoRoot 'bootstrap.ps1') -Raw
 if ($bootstrapText -notmatch 'SkipUpdates') { Add-Failure 'bootstrap.ps1 has no -SkipUpdates switch' }
 
 $profileText = Get-Content -Path (Join-Path $repoRoot 'config/profile/Microsoft.PowerShell_profile.ps1') -Raw
-foreach ($needle in @('eza', 'Get-Command bat', 'delta', 'fcd', 'function update')) {
+foreach ($needle in @('eza', 'Get-Command bat', 'delta', 'fcd', 'function update', '.codex\completions.ps1', 'Ctrl+t', 'Ctrl+r')) {
     if ($profileText -notmatch [regex]::Escape($needle)) { Add-Failure ("profile missing: {0}" -f $needle) }
 }
 

@@ -120,7 +120,8 @@ edit Terminal's JSON settings.
 4. Authenticates `gh`, installs 1Password and configures its SSH agent pipe.
 5. Clones `dotfiles` and `ai-harness`, then links the Windows-safe configs.
 6. Installs runtimes through `mise`. `fnm` and `bun` are installed only if `mise` fails.
-7. Installs Codex CLI and Claude Code. Auth is prompted unless you pass `-Yes`.
+7. Installs Codex CLI, Claude Code and Ollama, generates Codex tab completion
+   and prompts for auth unless you pass `-Yes`.
 8. Installs the GUI apps from `config/packages.txt`.
 9. Verifies the result and prints the remaining manual actions.
 

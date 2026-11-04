@@ -16,6 +16,15 @@ if (Test-Path $codexConfig) {
 
 if (Test-CommandExists 'codex') {
     Write-Ok ("codex present: {0}" -f ((& codex --version) -join ' '))
+    $completion = & codex completion powershell
+    if ($LASTEXITCODE -eq 0 -and $completion) {
+        $completionPath = Join-Path $HOME '.codex/completions.ps1'
+        $completion | Set-Content -Path $completionPath -Encoding UTF8
+        Write-Ok ("codex tab completion: {0}" -f $completionPath)
+    }
+    else {
+        Write-Warn 'codex tab completion was not generated'
+    }
     if ($usesOllamaCloud) {
         $key = [Environment]::GetEnvironmentVariable('OLLAMA_CLOUD_MAX_API_KEY', 'User')
         if ($key) {

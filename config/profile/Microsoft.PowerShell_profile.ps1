@@ -136,6 +136,34 @@ function work {
     }
 }
 
+# Codex ships its own completer. Step 50 regenerates the file after each
+# install, and Update-All refreshes it after an upgrade.
+$codexCompletion = Join-Path $HOME '.codex\completions.ps1'
+if (Test-Path $codexCompletion) { . $codexCompletion }
+
+if ((Get-Command fzf -ErrorAction SilentlyContinue) -and (Get-Command Set-PSReadLineKeyHandler -ErrorAction SilentlyContinue)) {
+    Set-PSReadLineKeyHandler -Key Ctrl+t -ScriptBlock {
+        $file = $null
+        if (Get-Command fd -ErrorAction SilentlyContinue) {
+            $file = & fd --type f --hidden --exclude .git | & fzf --height 40%
+        }
+        else {
+            $file = Get-ChildItem -File -Recurse -ErrorAction SilentlyContinue |
+                Select-Object -ExpandProperty FullName | & fzf --height 40%
+        }
+        if ($file) { [Microsoft.PowerShell.PSConsoleReadLine]::Insert($file) }
+    }
+    Set-PSReadLineKeyHandler -Key Ctrl+r -ScriptBlock {
+        $historyPath = (Get-PSReadLineOption).HistorySavePath
+        if (-not (Test-Path $historyPath)) { return }
+        $line = Get-Content -LiteralPath $historyPath | Select-Object -Unique | & fzf --height 40% --reverse
+        if ($line) {
+            [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
+            [Microsoft.PowerShell.PSConsoleReadLine]::Insert($line)
+        }
+    }
+}
+
 if (Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue) {
     Set-PSReadLineOption -PredictionSource History -ErrorAction SilentlyContinue
     Set-PSReadLineOption -PredictionViewStyle ListView -ErrorAction SilentlyContinue

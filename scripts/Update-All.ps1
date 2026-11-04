@@ -76,6 +76,15 @@ foreach ($tool in @('codex', 'claude')) {
     }
 }
 
+if (Test-Tool 'codex') {
+    $completionPath = Join-Path $HOME '.codex/completions.ps1'
+    $completion = & codex completion powershell
+    if ($LASTEXITCODE -eq 0 -and $completion) {
+        $completion | Set-Content -Path $completionPath -Encoding UTF8
+        Write-Host ("  refreshed: {0}" -f $completionPath)
+    }
+}
+
 Write-Host ''
 if ($DryRun) { Write-Host 'Dry run. Nothing was changed.' -ForegroundColor Yellow }
 else { Write-Host 'Updates finished. Open a new terminal if a CLI version looks stale.' -ForegroundColor Green }

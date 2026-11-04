@@ -28,6 +28,7 @@ gerardog.gsudo
 [ai]
 OpenAI.Codex
 Anthropic.ClaudeCode
+Ollama.Ollama
 
 # [apps] are GUI apps. Keep this list short.
 [apps]
