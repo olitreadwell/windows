@@ -1,0 +1,4 @@
+state/
+*.log
+*.bak.*
+knowledge/current-machine.generated.json

@@ -1,0 +1,35 @@
+# winget package IDs. One per line. # starts a comment.
+# Verify an ID before adding it: winget search <name>
+#
+# [core] is installed before anything else.
+[core]
+Microsoft.PowerShell
+Microsoft.WindowsTerminal
+Git.Git
+GitHub.cli
+Starship.Starship
+jdx.mise
+AgileBits.1Password
+AgileBits.1Password.CLI
+astral-sh.uv
+Schniz.fnm
+Oven-sh.Bun
+BurntSushi.ripgrep.MSVC
+sharkdp.fd
+junegunn.fzf
+ajeetdsouza.zoxide
+7zip.7zip
+
+# [ai] are the agent CLIs. Auth stays interactive.
+[ai]
+OpenAI.Codex
+Anthropic.Claude
+
+# [apps] are GUI apps. Keep this list short.
+[apps]
+Google.Chrome
+Mozilla.Firefox
+Microsoft.VisualStudioCode
+Obsidian.Obsidian
+Spotify.Spotify
+Microsoft.PowerToys

@@ -1,0 +1,207 @@
+# starship.dark.toml  -  CVD-safe (protanopia), zsh2000-inspired, dark variant.
+# Two-line. Line 1 = densest-relevant info, line 2 = ❯ only.
+# Companion: ~/dotfiles/starship.light.toml
+# Width gating: modules with `when = "test $COLUMNS -gt N"` hide on narrow widths.
+# For COLUMNS to be visible, ~/.zshrc has `typeset -x COLUMNS`.
+
+format = """
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_status\
+$direnv\
+$nodejs\
+$python\
+$ruby\
+$package\
+$custom\
+$aws\
+$gcloud\
+$kubernetes\
+$docker_context\
+$terraform\
+$fill\
+$cmd_duration\
+$time\
+$line_break\
+$character"""
+
+right_format = ""
+add_newline = true
+palette = "okabe_dark"
+command_timeout = 1000
+
+[palettes.okabe_dark]
+# Okabe-Ito derived. No red/green pairs.
+bg_block  = "#1d3557"     # navy
+blue      = "#0072B2"     # dir block
+sky       = "#56B4E9"     # git branch block (clean signal)
+orange    = "#E69F00"     # dirty / warn block
+vermilion = "#D55E00"     # high-priority warn
+grey      = "#8d99ae"     # inline secondary text
+chrome    = "#adb5bd"     # inline tertiary text
+black_fg  = "#1d1f21"
+white_fg  = "#f1faee"
+
+# ── line 2: prompt char ───────────────────────────────────────────────────
+[character]
+success_symbol = "[❯](bold blue)"
+error_symbol   = "[❯](bold orange)"
+vimcmd_symbol  = "[❮](bold sky)"
+
+# ── username (ssh / root only) ────────────────────────────────────────────
+[username]
+style_user  = "bg:bg_block fg:white_fg"
+style_root  = "bg:orange fg:black_fg"
+format      = "[ $user ]($style)"
+show_always = false
+disabled    = false
+
+# ── hostname (ssh only) ───────────────────────────────────────────────────
+[hostname]
+ssh_only   = true
+ssh_symbol = " "
+style      = "bg:bg_block fg:white_fg"
+format     = "[$ssh_symbol$hostname ]($style)"
+
+# ── directory (BLUE block; aggressive truncation for narrow) ──────────────
+[directory]
+style                     = "bg:blue fg:white_fg"
+format                    = "[ $path$read_only ]($style)"
+truncation_length         = 2
+truncation_symbol         = "…/"
+truncate_to_repo          = true
+fish_style_pwd_dir_length = 1
+read_only                 = " "
+read_only_style           = "bg:orange fg:black_fg"
+home_symbol               = "~"
+
+# ── git branch (SKY block) ────────────────────────────────────────────────
+[git_branch]
+symbol            = " "
+style             = "bg:sky fg:black_fg"
+format            = "[$symbol$branch ]($style)"
+truncation_length = 24
+truncation_symbol = "…"
+
+# ── git status (ORANGE block when dirty; shape redundancy) ────────────────
+[git_status]
+style       = "bg:orange fg:black_fg"
+format      = "[ $all_status$ahead_behind]($style)"
+conflicted  = "✗ "
+ahead       = "⇡${count} "
+behind      = "⇣${count} "
+diverged    = "⇕⇡${ahead_count}⇣${behind_count} "
+up_to_date  = ""
+untracked   = "✭${count} "
+stashed     = "⚑${count} "
+modified    = "✗${count} "
+staged      = "[+${count} ](fg:black_fg)"
+renamed     = "»${count} "
+deleted     = "✗${count} "
+
+# ── inline-style stack modules (grey fg, transparent bg) ──────────────────
+# All have `disabled = false` and detect-on-project, so they self-hide.
+
+[direnv]
+disabled = false
+style    = "fg:chrome"
+format   = " [direnv $loaded$allowed]($style)"
+
+[nodejs]
+detect_files   = ["package.json", ".nvmrc", ".node-version"]
+detect_folders = ["node_modules"]
+style          = "fg:grey"
+format         = " [⬢ $version]($style)"
+
+[python]
+detect_files = ["pyproject.toml", "requirements.txt", ".python-version", "Pipfile"]
+style        = "fg:grey"
+format       = " [🐍 $version]($style)"
+
+[ruby]
+detect_files = ["Gemfile", ".ruby-version"]
+style        = "fg:grey"
+format       = " [💎 $version]($style)"
+
+[package]
+disabled         = false
+style            = "fg:chrome"
+format           = " [v$version]($style)"
+display_private  = false
+version_format   = "v${raw}"
+
+# ── context modules (only show when active env) ───────────────────────────
+
+[aws]
+style  = "fg:orange"
+format = ' [ $profile ${region}]($style)'
+disabled = false
+
+[gcloud]
+style  = "fg:orange"
+format = ' [☁  $account@$project]($style)'
+disabled = true
+
+[kubernetes]
+style    = "fg:orange"
+format   = ' [⎈ $context $namespace]($style)'
+disabled = false
+# Only show on non-default contexts:
+detect_files = ["k8s", "skaffold.yaml", "Chart.yaml", "kustomization.yaml"]
+contexts = [
+  { context_pattern = "prod.*", style = "bg:vermilion fg:white_fg" },
+]
+
+[docker_context]
+only_with_files = true
+detect_files = ["docker-compose.yml", "docker-compose.yaml", "Dockerfile"]
+style = "fg:grey"
+format = ' [🐳 $context]($style)'
+
+[terraform]
+style  = "fg:grey"
+format = ' [󱁢 $workspace]($style)'
+
+# ── custom: mise active runtime (width-gated, ≥100 cols) ──────────────────
+[custom.mise]
+description = "Show active mise toolchain when terminal is wide enough."
+command     = "mise current 2>/dev/null | awk '{printf \"%s %s\", $1, $2; exit}'"
+when        = """test "${COLUMNS:-$(tput cols 2>/dev/null || echo 0)}" -gt 100 && command -v mise >/dev/null"""
+style       = "fg:chrome"
+format      = " [⚙ $output]($style)"
+shell       = ["zsh", "--noprofile", "--norc", "-c"]
+
+# ── custom: vercel linked project (width-gated, ≥110 cols) ────────────────
+[custom.vercel]
+description = "Show linked Vercel project when in a linked dir and terminal is wide."
+command     = "jq -r '.projectName // .name // empty' .vercel/project.json 2>/dev/null"
+when        = """test -f .vercel/project.json && test "${COLUMNS:-$(tput cols 2>/dev/null || echo 0)}" -gt 110"""
+style       = "fg:chrome"
+format      = " [▲ $output]($style)"
+shell       = ["zsh", "--noprofile", "--norc", "-c"]
+
+# ── fill (push tail segments to far right of line 1) ──────────────────────
+[fill]
+symbol = " "
+style  = "fg:bg_block"
+
+# ── cmd duration (only when >3s) ──────────────────────────────────────────
+[cmd_duration]
+min_time            = 3000
+show_milliseconds   = false
+style               = "fg:orange"
+format              = "[ ⏱ $duration]($style)"
+
+# ── time (WHITE block, BLACK text  -  zsh2000 signature) ────────────────────
+[time]
+disabled        = false
+time_format     = "%H:%M:%S"
+style           = "bg:white_fg fg:black_fg"
+format          = " [ $time NZ ]($style)"
+utc_time_offset = "local"
+
+# ── line break before $character (line 2) ─────────────────────────────────
+[line_break]
+disabled = false

@@ -1,0 +1,28 @@
+# Personal repos cloned into ~/code by step 45-repos.sh.
+# One repo name per line; # starts a comment. Add new repos here.
+# OSS forks (react-spectrum, aws-cdk, uswds, etc.) deliberately excluded  - 
+# contribution work, not needed on the new machine.
+kiwi-djs
+dashboards
+wellington-run-clubs
+wellington-art-galleries
+op-shop-directory
+tim-curry-in-nz
+the-wind-keeps-her-songs
+happy-hour-hounds
+wlg-house-hunt
+tall-poppies
+photography
+oss-contrib-pipeline
+nz-redundancy-guide
+nz-open-data-connectors
+wlg-nz-quizzes
+nz-tech-for-good
+nz-data-lab
+kiwi-fests
+active-learning
+new-zealand-data
+pr-vetting
+cooking
+interview-prep
+# oli + career live in iCloud Drive  -  they sync automatically, no clone.

@@ -1,0 +1,79 @@
+[user]
+	name = olitreadwell
+	email = oliver.treadwell@gmail.com
+[init]
+	defaultBranch = main
+[push]
+	autoSetupRemote = true
+[core]
+	hooksPath = ~/.config/git/hooks
+	excludesfile = ~/.gitignore_global
+	autocrlf = input
+[credential]
+	helper = manager
+[checkout]
+	defaultRemote = origin
+[pull]
+	rebase = true
+	ff = only
+[merge]
+	ff = false
+	conflictstyle = diff3
+[diff]
+	algorithm = patience
+	renames = copies
+[status]
+	showUntrackedFiles = all
+[log]
+	date = iso
+	decorate = true
+[color]
+	ui = auto
+[branch]
+	autosetuprebase = always
+[commit]
+	template = ~/.gitmessage
+	gpgsign = false
+[alias]
+	gs = status -s
+	ga = add .
+	gc = commit -m
+	gp = push
+	gl = pull --rebase
+	gpl = pull
+	lg = log --oneline --graph --decorate --all
+	ll = log --pretty=format:"%h %ad | %s%d [%an]" --date=short
+	logs = log --oneline --since="1 week ago"
+	lgo = log --oneline --author="Oli"
+	bn = checkout -b
+	bd = branch -d
+	bD = branch -D
+	ba = branch -a
+	br = branch -r
+	bm = checkout main
+	st = stash
+	stl = stash list
+	stp = stash pop
+	sta = stash apply
+	std = stash drop
+	df = diff
+	dc = diff --cached
+	ds = diff --staged
+	dw = diff --word-diff
+	rh = reset --hard
+	rs = reset --soft
+	rm = reset --mixed
+	r1 = reset HEAD~1
+	mg = merge
+	rb = rebase
+	rbi = rebase -i
+	rc = rebase --continue
+	ra = rebase --abort
+	cp = cherry-pick
+	rv = revert
+	rvu = remote -v
+	rma = remote add
+	rmr = remote rm
+	tg = tag
+	tga = tag -a
+	tgp = push --tags

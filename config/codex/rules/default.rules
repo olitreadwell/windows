@@ -1,0 +1,91 @@
+# Command rules for Codex. Starlark, loaded from ~/.codex/rules/ at startup.
+# A rule decides whether Codex may run a matching command OUTSIDE the sandbox.
+# Decisions: forbidden > prompt > allow.
+#
+# Test any change with, before restarting Codex:
+#   codex execpolicy check --pretty --rules ~/.codex/rules/default.rules -- <command>
+#
+# `match` and `not_match` are examples the loader validates on startup, so a
+# rule that matches the wrong thing fails loudly instead of silently.
+#
+# Why a rules file when ~/bin/codex-guard also runs as a PreToolUse hook: the
+# hook is a subprocess that matches substrings, so a harmless "find" command
+# that merely names the outbound mail script is refused. Rules match the
+# argument list from position 0, which is exact, and they ship test cases.
+
+# Force-pushing rewrites history for everyone who already pulled. A normal
+# push is untouched.
+prefix_rule(
+    pattern = ["git", "push", ["--force", "-f", "--force-with-lease", "--force-if-includes"]],
+    decision = "forbidden",
+    justification = "Force push rewrites shared history. Push a new commit, or ask the user to run it by hand.",
+    match = [
+        "git push --force",
+        "git push -f origin main",
+        "git push --force-with-lease origin main",
+    ],
+    not_match = [
+        "git push",
+        "git push origin main",
+    ],
+)
+
+# Hard reset throws away uncommitted work with no undo.
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "forbidden",
+    justification = "Hard reset discards uncommitted work. Use `git stash` first, or ask the user.",
+    match = [
+        "git reset --hard",
+        "git reset --hard HEAD~1",
+    ],
+    not_match = [
+        "git reset --soft HEAD~1",
+        "git reset HEAD README.md",
+    ],
+)
+
+# git clean deletes untracked files and does not put them anywhere.
+prefix_rule(
+    pattern = ["git", "clean", ["-f", "-fd", "-fdx", "-xfd", "-ff"]],
+    decision = "forbidden",
+    justification = "git clean deletes untracked files with no undo. List them with `git clean -nd` first.",
+    match = [
+        "git clean -fd",
+        "git clean -f",
+    ],
+    not_match = [
+        "git clean -n",
+        "git clean -nd",
+    ],
+)
+
+# A recursive delete aimed at a root or a home directory. Anything scoped
+# inside a repo is left alone, because that is ordinary work.
+prefix_rule(
+    pattern = ["rm", "-rf", ["/", "/*", "~", "$HOME"]],
+    decision = "forbidden",
+    justification = "This deletes a root or home path. Name the exact directory you mean instead.",
+    match = [
+        "rm -rf /",
+        "rm -rf ~",
+    ],
+    not_match = [
+        "rm -rf node_modules",
+        "rm -rf /tmp/build",
+    ],
+)
+
+# Same delete, reached through sudo. Separate rule because "sudo" shifts
+# every later position by one.
+prefix_rule(
+    pattern = ["sudo", "rm"],
+    decision = "forbidden",
+    justification = "Recursive delete as root. Ask the user to run it by hand.",
+    match = [
+        "sudo rm -rf /var/log/old",
+    ],
+    not_match = [
+        "rm -rf /tmp/build",
+    ],
+)
