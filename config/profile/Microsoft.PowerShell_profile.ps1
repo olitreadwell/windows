@@ -18,6 +18,11 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     Invoke-Expression (& { (zoxide init powershell | Out-String) })
 }
 
+if (Get-Command mise -ErrorAction SilentlyContinue) {
+    $miseInit = & mise activate pwsh 2>$null
+    if ($miseInit) { Invoke-Expression ($miseInit | Out-String) }
+}
+
 if (Get-Command gh -ErrorAction SilentlyContinue) {
     Set-Alias -Name ghs -Value gh
 }

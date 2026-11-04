@@ -89,3 +89,5 @@ The harness installer is the strongest candidate to move upstream into
    and a small `codex exec` run before relying on it.
 5. The model catalog is 217 KB, too large to carry in agent context, so it
    is fetched from the public `laptop` repo at provision time.
+6. The Codex command rules do not cover every Windows destructive command or
+   every force-push flag order. Treat them as a guard, not a sandbox.
