@@ -38,6 +38,11 @@ foreach ($raw in Get-Content -LiteralPath $manifest) {
         continue
     }
 
+    if (-not $useGh -and $global:OliAssumeYes) {
+        Write-Warn ("needs gh auth; skipping clone: {0}" -f $repo)
+        continue
+    }
+
     if ($useGh) { & gh repo clone ("olitreadwell/{0}" -f $repo) $destination }
     else { & git clone ("https://github.com/olitreadwell/{0}.git" -f $repo) $destination }
 

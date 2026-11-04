@@ -29,6 +29,11 @@ function Update-GitRepo {
         $useGh = ($LASTEXITCODE -eq 0)
     }
 
+    if (-not $useGh -and $global:OliAssumeYes) {
+        Write-Warn ("private repo needs gh auth; skipping: {0}. Run: gh auth login" -f $Repo)
+        return
+    }
+
     if ($useGh) { & gh repo clone $Repo $Destination }
     else { & git clone ("https://github.com/{0}.git" -f $Repo) $Destination }
 
