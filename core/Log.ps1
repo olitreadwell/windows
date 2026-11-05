@@ -38,11 +38,20 @@ function Add-LogLine {
         [string]$Kind = 'INFO'
     )
 
-    foreach ($path in @($global:OliRunLog, $global:OliLogFile)) {
-        if ($path) { Add-Content -Path $path -Value $Line -Encoding UTF8 }
-    }
-    if ($Kind -eq 'ERROR' -and $global:OliErrorLog) {
-        Add-Content -Path $global:OliErrorLog -Value $Line -Encoding UTF8
+    $targets = @($global:OliRunLog, $global:OliLogFile)
+    if ($Kind -eq 'ERROR' -and $global:OliErrorLog) { $targets += $global:OliErrorLog }
+    foreach ($path in $targets) {
+        if (-not $path) { continue }
+        # Two parallel runs can append to the same shared log at once.
+        for ($attempt = 0; $attempt -lt 6; $attempt++) {
+            try {
+                Add-Content -Path $path -Value $Line -Encoding UTF8 -ErrorAction Stop
+                break
+            }
+            catch {
+                Start-Sleep -Milliseconds 150
+            }
+        }
     }
 }
 

@@ -19,11 +19,15 @@ powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -From 40-dotfiles
 
 .EXAMPLE
 powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -SkipUpdates
+
+.EXAMPLE
+powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -Parallel -SkipUpdates
 #>
 [CmdletBinding()]
 param(
     [string]$From,
     [string]$Only,
+    [switch]$Parallel,
     [switch]$SkipUpdates,
     [switch]$DryRun,
     [switch]$Yes,
@@ -92,35 +96,73 @@ if ($DryRun) {
 }
 
 $started = Get-Date
-$stepResults = @()
-foreach ($step in $plan) {
-    $path = Join-Path $repoRoot ("steps/{0}.ps1" -f $step)
+$script:stepResults = @()
+$bootstrapPath = $MyInvocation.MyCommand.Path
+
+function Invoke-Step {
+    param([Parameter(Mandatory = $true)][string]$Step)
+
+    $path = Join-Path $repoRoot ("steps/{0}.ps1" -f $Step)
     $stepStart = Get-Date
-    Write-StepHeader $step
+    Write-StepHeader $Step
     try {
         & $path
     }
     catch {
         $failure = $_.Exception.Message
-        $stepResults += [pscustomobject]@{
-            step    = $step
+        $script:stepResults += [pscustomobject]@{
+            step    = $Step
             status  = 'failed'
             seconds = [math]::Round(((Get-Date) - $stepStart).TotalSeconds, 1)
             error   = $failure
         }
-        try { Save-RunSummary -Status 'failed' -Started $started -Steps $stepResults }
+        try { Save-RunSummary -Status 'failed' -Started $started -Steps $script:stepResults }
         catch { Write-Warn ("run summary failed: {0}" -f $_.Exception.Message) }
-        Write-Fail ("step {0} failed: {1} | resume: .\bootstrap.ps1 -From {0}" -f $step, $failure)
+        Write-Fail ("step {0} failed: {1} | resume: .\bootstrap.ps1 -From {0}" -f $Step, $failure)
     }
-    $stepResults += [pscustomobject]@{
-        step    = $step
+    $script:stepResults += [pscustomobject]@{
+        step    = $Step
         status  = 'ok'
         seconds = [math]::Round(((Get-Date) - $stepStart).TotalSeconds, 1)
     }
-    Write-Log ("step {0} took {1:n1}s" -f $step, ((Get-Date) - $stepStart).TotalSeconds)
+    Write-Log ("step {0} took {1:n1}s" -f $Step, ((Get-Date) - $stepStart).TotalSeconds)
 }
 
-try { Save-RunSummary -Status 'ok' -Started $started -Steps $stepResults }
+# Winget takes a global installer lock, so winget steps stay serial. The
+# sidecar steps use mise, PSGallery and git instead, which is why they can
+# run while 60-apps downloads.
+$sidecarNames = @('45-runtimes', '47-pwsh-modules', '65-repos')
+$useParallel = $Parallel -and ($plan -contains '60-apps')
+$sidecars = @()
+$serialPlan = $plan
+if ($useParallel) {
+    $sidecars = @($plan | Where-Object { $sidecarNames -contains $_ })
+    $serialPlan = @($plan | Where-Object { $sidecarNames -notcontains $_ })
+}
+
+$children = @()
+$appsIndex = [Array]::IndexOf($serialPlan, '60-apps')
+for ($index = 0; $index -lt $serialPlan.Count; $index++) {
+    if ($useParallel -and $index -eq $appsIndex -and $sidecars.Count -gt 0) {
+        foreach ($sidecar in $sidecars) {
+            Write-Log ("starting in parallel: {0}" -f $sidecar)
+            $arguments = '-NoProfile -ExecutionPolicy Bypass -File "{0}" -Only {1} -SkipUpdates -Yes' -f $bootstrapPath, $sidecar
+            $process = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -PassThru
+            $children += [pscustomobject]@{ Step = $sidecar; Process = $process }
+        }
+    }
+    Invoke-Step -Step $serialPlan[$index]
+}
+
+foreach ($child in $children) {
+    $child.Process.WaitForExit()
+    if ($child.Process.ExitCode -ne 0) {
+        Write-Fail ("parallel step failed: {0} (exit {1}) | resume: .\bootstrap.ps1 -Only {0}" -f $child.Step, $child.Process.ExitCode)
+    }
+    Write-Ok ("parallel step finished: {0}" -f $child.Step)
+}
+
+try { Save-RunSummary -Status 'ok' -Started $started -Steps $script:stepResults }
 catch { Write-Warn ("run summary failed: {0}" -f $_.Exception.Message) }
 $elapsed = (Get-Date) - $started
 Write-Host ''

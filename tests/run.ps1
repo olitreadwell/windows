@@ -134,6 +134,7 @@ foreach ($id in @($core + $ai + $apps)) {
 
 $bootstrapText = Get-Content -Path (Join-Path $repoRoot 'bootstrap.ps1') -Raw
 if ($bootstrapText -notmatch 'SkipUpdates') { Add-Failure 'bootstrap.ps1 has no -SkipUpdates switch' }
+if ($bootstrapText -notmatch 'Parallel') { Add-Failure 'bootstrap.ps1 has no -Parallel switch' }
 
 $profileText = Get-Content -Path (Join-Path $repoRoot 'config/profile/Microsoft.PowerShell_profile.ps1') -Raw
 foreach ($needle in @('eza', 'Get-Command bat', 'delta', 'fcd', 'function update', 'function logs', 'function doctor', 'function caffeinate', 'function defaultapps', '.codex\completions.ps1', 'PSFzf', 'Terminal-Icons', 'Ctrl+t', 'Ctrl+r')) {
