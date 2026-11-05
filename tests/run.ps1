@@ -94,9 +94,9 @@ $plan = @(Get-StepPlan -RepoRoot $repoRoot)
 if ($plan.Count -eq 0) { Add-Failure 'empty step plan' }
 $expectedSteps = @(
     '10-preflight', '12-settings', '14-remote', '15-updates', '20-winget',
-    '25-core-tools', '26-scoop', '30-auth', '35-1password',
+    '25-core-tools', '26-scoop', '27-apps', '30-auth', '35-1password',
     '40-dotfiles', '45-runtimes', '47-pwsh-modules', '50-ai-tools',
-    '60-apps', '65-repos', '90-verify'
+    '65-repos', '90-verify'
 )
 if (($plan -join ',') -ne ($expectedSteps -join ',')) {
     Add-Failure ("step plan mismatch: {0}" -f ($plan -join ', '))

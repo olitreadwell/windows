@@ -21,7 +21,7 @@ Where each piece of the current setup goes. Status values:
 | `50-shell` zsh and oh-my-zsh | PowerShell profile, Starship, PSReadLine | Adapted |
 | `55-macos-settings` | none yet | Deferred |
 | `60-runtimes` mise | `45-runtimes` mise. uv is core; fnm and bun are fallbacks only if mise fails | Adapted |
-| `70-apps` mas | `60-apps` winget | Adapted |
+| `70-apps` mas | `27-apps` winget | Adapted |
 | `75-apps-config` plist restore | none yet | Deferred |
 | `76-manual-apps` DMG installs | none yet | Deferred |
 | `80-auth` gh, claude, codex | `30-auth` and `50-ai-tools` | Ported |

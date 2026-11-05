@@ -90,9 +90,10 @@ repo; the bootstrap still installs git and clones `dotfiles` and
 - `.\bootstrap.ps1 -Only 26-scoop` prints the Scoop command (run it from a normal window).
 - `.\bootstrap.ps1 -SkipUpdates` runs every step except Windows Update and
   pauses updates for 7 days, so a stuck feature install stops retrying.
-- `.\bootstrap.ps1 -Parallel` runs `45-runtimes`, `47-pwsh-modules` and
-  `65-repos` in separate windows while `60-apps` installs. Winget steps stay
-  serial because winget takes a global installer lock.
+- `.\bootstrap.ps1 -Parallel` runs `47-pwsh-modules` in a separate window
+  while `27-apps` installs. Winget steps stay serial because winget takes a
+  global installer lock. `45-runtimes` cannot move earlier: it needs the
+  mise config that step 40 links.
 - `.\bootstrap.ps1 -OptionalApps` adds the large or situational apps
   (LibreOffice, GIMP, darktable, Mixxx, qBittorrent, Beeper, Jan, Dataflare).
 - `.\bootstrap.ps1 -Yes` skips interactive auth prompts with warnings.
@@ -145,14 +146,15 @@ scoop bucket add extras
 5. Ensures `winget`, then installs the core CLI tools: `bat`, `eza`, `delta`,
    `fzf`, `zoxide`, `ripgrep`, `fd`, `jq`, `ffmpeg`, the cloud and Kubernetes
    CLIs, a Nerd Font and `gsudo`.
-6. Authenticates `gh`, installs 1Password and configures its SSH agent pipe.
-7. Clones `dotfiles` and `ai-harness`, then links the Windows-safe configs.
-8. Installs runtimes through `mise`. `fnm` and `bun` are installed only if `mise` fails.
-9. Installs the PowerShell module bundle: `PSFzf` for fuzzy history and files,
+6. Installs the GUI apps from `config/packages.txt`, so Zen, Alacritty,
+   Tailscale and the rest are proven working before the long steps.
+7. Authenticates `gh`, installs 1Password and configures its SSH agent pipe.
+8. Clones `dotfiles` and `ai-harness`, then links the Windows-safe configs.
+9. Installs runtimes through `mise`. `fnm` and `bun` are installed only if `mise` fails.
+10. Installs the PowerShell module bundle: `PSFzf` for fuzzy history and files,
    and `Terminal-Icons` for icons in `Get-ChildItem`.
-10. Installs Codex CLI, Claude Code and Ollama, generates Codex tab completion
+11. Installs Codex CLI, Claude Code and Ollama, generates Codex tab completion
    and prompts for auth unless you pass `-Yes`.
-11. Installs the GUI apps from `config/packages.txt`.
 12. Verifies the result and prints the remaining manual actions.
 
 A full run downloads several GB. The macOS to Windows mapping, including

@@ -132,9 +132,9 @@ function Invoke-Step {
 
 # Winget takes a global installer lock, so winget steps stay serial. The
 # sidecar steps use mise, PSGallery and git instead, which is why they can
-# run while 60-apps downloads.
-$sidecarNames = @('45-runtimes', '47-pwsh-modules', '65-repos')
-$useParallel = $Parallel -and ($plan -contains '60-apps')
+# run while 27-apps downloads.
+$sidecarNames = @('47-pwsh-modules')
+$useParallel = $Parallel -and ($plan -contains '27-apps')
 $sidecars = @()
 $serialPlan = $plan
 if ($useParallel) {
@@ -143,7 +143,7 @@ if ($useParallel) {
 }
 
 $children = @()
-$appsIndex = [Array]::IndexOf($serialPlan, '60-apps')
+$appsIndex = [Array]::IndexOf($serialPlan, '27-apps')
 for ($index = 0; $index -lt $serialPlan.Count; $index++) {
     if ($useParallel -and $index -eq $appsIndex -and $sidecars.Count -gt 0) {
         foreach ($sidecar in $sidecars) {

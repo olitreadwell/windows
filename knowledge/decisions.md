@@ -177,7 +177,7 @@ Windows 10 validates the default-browser choice with a hash in
 ignored, and third-party tools that forge the hash break on the next
 Windows change. Hiding that behind a script is worse than one manual pick.
 
-Decision: step `60-apps` reads the recorded ProgId, reports the current
+Decision: step `27-apps` reads the recorded ProgId, reports the current
 browser, and opens the Default Apps page when it is not Zen. It never writes
 `UserChoice`. The profile offers `defaultapps` to reopen the page.
 
