@@ -42,8 +42,8 @@ else {
     }
 }
 
-& winget source update --accept-source-agreements 2>$null | Out-Null
+& winget source update --accept-source-agreements 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) { Write-Warn 'winget source update failed; continuing with the cached source' }
 
-& winget list --accept-source-agreements 2>$null | Out-Null
+& winget list --accept-source-agreements 2>&1 | Out-Null
 Write-Ok 'winget source agreements accepted'

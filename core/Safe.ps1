@@ -24,7 +24,7 @@ function Test-CommandWorks {
 
     if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) { return $false }
     try {
-        $output = & $Name @Arguments 2>$null
+        $output = & $Name @Arguments 2>&1
         if ($LASTEXITCODE -ne 0) { return $false }
         return (($output -join ' ').Trim().Length -gt 0)
     }

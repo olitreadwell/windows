@@ -34,7 +34,7 @@ if (-not (Test-CommandExists 'op')) {
 }
 else {
     Write-Ok ("op present: {0}" -f ((& op --version) -join ' '))
-    & op account list 2>$null | Out-Null
+    & op account list 2>&1 | Out-Null
     if ($LASTEXITCODE -eq 0) {
         $opReady = $true
         Write-Ok '1Password CLI is signed in'

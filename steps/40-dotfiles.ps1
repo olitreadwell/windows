@@ -10,7 +10,7 @@ function Update-GitRepo {
     )
 
     if (Test-Path (Join-Path $Destination '.git')) {
-        & git -c credential.interactive=false -C $Destination pull --ff-only origin main 2>$null | Out-Null
+        & git -c credential.interactive=false -C $Destination pull --ff-only origin main 2>&1 | Out-Null
         if ($LASTEXITCODE -ne 0) { Write-Warn "pull failed: $Repo" }
         else { Write-Ok "updated: $Repo" }
         return
@@ -27,7 +27,7 @@ function Update-GitRepo {
 
     $useGh = (Test-CommandExists 'gh')
     if ($useGh) {
-        & gh auth status 2>$null | Out-Null
+        & gh auth status 2>&1 | Out-Null
         $useGh = ($LASTEXITCODE -eq 0)
     }
 
@@ -63,9 +63,9 @@ Install-AgentHarness -HarnessDir $harness
 Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'config/gitconfig.txt') -Destination (Join-Path $HOME '.gitconfig') -CopyOnly | Out-Null
 # The copy replaces the helper that step 30 configured, so reapply it here.
 if (Test-CommandExists 'gh') {
-    & gh auth status 2>$null | Out-Null
+    & gh auth status 2>&1 | Out-Null
     if ($LASTEXITCODE -eq 0) {
-        & gh auth setup-git 2>$null | Out-Null
+        & gh auth setup-git 2>&1 | Out-Null
         if ($LASTEXITCODE -eq 0) { Write-Ok 'gh credential helper reapplied after the git config copy' }
         else { Write-Warn 'gh auth setup-git failed after the git config copy' }
     }

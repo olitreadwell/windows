@@ -63,7 +63,7 @@ else {
 Write-Section 'gh extensions'
 if (Test-Tool 'gh') {
     if ($DryRun) { & gh extension list }
-    else { & gh extension upgrade --all 2>$null }
+    else { & gh extension upgrade --all 2>&1 | Out-Null }
 }
 
 Write-Section 'agent CLIs'

@@ -14,17 +14,17 @@ foreach ($tool in $required) {
 }
 
 if (Test-CommandWorks -Name 'gh') {
-    & gh auth status 2>$null | Out-Null
+    & gh auth status 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { Write-Warn 'gh is installed but not authenticated. Run: gh auth login --web' }
 }
 if (Test-CommandWorks -Name 'op') {
-    & op account list 2>$null | Out-Null
+    & op account list 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { Write-Warn '1Password CLI is installed but not signed in' }
 }
 
 if (Test-CommandExists 'git') {
-    $name = & git config --global user.name 2>$null
-    $email = & git config --global user.email 2>$null
+    $name = & git config --global user.name 2>&1
+    $email = & git config --global user.email 2>&1
     if ($name -and $email) {
         Write-Ok ("git identity: {0} <{1}>" -f $name, $email)
     }

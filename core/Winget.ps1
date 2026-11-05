@@ -34,7 +34,7 @@ function Test-WingetPackage {
 
     if (-not (Test-WingetAvailable)) { return $false }
 
-    $output = & winget list --id $Id --exact --accept-source-agreements 2>$null
+    $output = & winget list --id $Id --exact --accept-source-agreements 2>&1
     if ($LASTEXITCODE -ne 0) { return $false }
     return [bool](($output -join "`n") -match [regex]::Escape($Id))
 }
@@ -92,7 +92,7 @@ function Install-WingetPackage {
     $startInfo.UseShellExecute = $false
     $process = [System.Diagnostics.Process]::Start($startInfo)
     if (-not $process.WaitForExit($timeoutMinutes * 60000)) {
-        & taskkill.exe /PID $process.Id /T /F 2>$null | Out-Null
+        & taskkill.exe /PID $process.Id /T /F 2>&1 | Out-Null
         try { $process.Kill() } catch { }
         Write-Warn ("winget timed out after {0} minutes: {1} ({2}). Close the app and re-run." -f $timeoutMinutes, $Name, $Id)
         Write-Warn 'Override with: $env:OLI_WINGET_TIMEOUT_MINUTES = 15'

@@ -60,7 +60,7 @@ else {
 
 if (Test-CommandWorks -Name 'claude') {
     Write-Ok ("claude present: {0}" -f ((& claude --version) -join ' '))
-    & claude auth status 2>$null | Out-Null
+    & claude auth status 2>&1 | Out-Null
     if ($LASTEXITCODE -eq 0) {
         Write-Ok 'claude is authenticated'
     }

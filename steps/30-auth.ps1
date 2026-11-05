@@ -6,10 +6,10 @@ if (-not (Test-CommandExists 'gh')) {
     return
 }
 
-& gh auth status 2>$null | Out-Null
+& gh auth status 2>&1 | Out-Null
 if ($LASTEXITCODE -eq 0) {
     Write-Ok 'gh already authenticated'
-    & gh auth setup-git 2>$null | Out-Null
+    & gh auth setup-git 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { Write-Warn 'gh auth setup-git failed; git may still prompt for credentials' }
     return
 }
@@ -25,6 +25,6 @@ if ($LASTEXITCODE -ne 0) {
     return
 }
 
-& gh auth setup-git 2>$null | Out-Null
+& gh auth setup-git 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) { Write-Warn 'gh auth setup-git failed; git may still prompt for credentials' }
 Write-Ok 'gh authenticated and git credential helper configured'

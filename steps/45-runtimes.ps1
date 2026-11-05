@@ -14,7 +14,7 @@ if (-not (Test-Path $configPath)) {
 
 Push-Location $HOME
 try {
-    & mise trust $configPath 2>$null | Out-Null
+    & mise trust $configPath 2>&1 | Out-Null
     & mise install
     $miseExit = $LASTEXITCODE
 }

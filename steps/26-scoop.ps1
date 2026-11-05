@@ -39,7 +39,7 @@ catch {
 if (Test-Path $scoopShim) {
     $env:Path = (Join-Path $HOME 'scoop/shims') + ';' + $env:Path
     Write-Ok 'scoop installed'
-    & $scoopShim bucket add extras 2>$null | Out-Null
+    & $scoopShim bucket add extras 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { Write-Warn 'scoop bucket add extras failed' }
     else { Write-Ok 'scoop extras bucket added' }
 }

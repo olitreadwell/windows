@@ -53,7 +53,7 @@ $report.Add(('- memory: {0} GB' -f [math]::Round($cs.TotalPhysicalMemory / 1GB, 
 $report.Add(('- free disk: {0} GB' -f [math]::Round((Get-PSDrive -Name $env:SystemDrive.TrimEnd(':')).Free / 1GB, 1)))
 $report.Add(('- powershell: {0}' -f $PSVersionTable.PSVersion))
 if (Get-Command winget.exe -ErrorAction SilentlyContinue) {
-    $wingetVersion = (& winget --version 2>$null) -join ' '
+    $wingetVersion = (& winget --version 2>&1) -join ' '
     $report.Add(('- winget: {0}' -f $wingetVersion))
 }
 $report.Add('')
@@ -118,7 +118,7 @@ if (Get-Command winget.exe -ErrorAction SilentlyContinue) {
     $report.Add('## winget list (first 400 lines)')
     $report.Add('')
     $report.Add('```')
-    $report.AddRange([string[]]@((& winget list --accept-source-agreements 2>$null) | Select-Object -First 400))
+    $report.AddRange([string[]]@((& winget list --accept-source-agreements 2>&1) | Select-Object -First 400))
     $report.Add('```')
     $report.Add('')
 }
@@ -142,7 +142,7 @@ if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
     Write-Warning 'gh is not installed. Install GitHub CLI, run gh auth login, then retry.'
     return
 }
-& gh auth status 2>$null | Out-Null
+& gh auth status 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) {
     Write-Warning 'gh is not signed in. Run: gh auth login --web'
     return
@@ -153,7 +153,7 @@ $id = $null
 if (Test-Path $idFile) { $id = (Get-Content -LiteralPath $idFile -First 1).Trim() }
 
 if ($id) {
-    & gh gist edit $id $outFile 2>$null | Out-Null
+    & gh gist edit $id $outFile 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) {
         Write-Warning "gist update failed for $id; creating a new one"
         $id = $null
@@ -161,7 +161,7 @@ if ($id) {
 }
 
 if (-not $id) {
-    $id = (& gh gist create --desc 'Windows bootstrap logs' $outFile 2>$null | Select-Object -Last 1)
+    $id = (& gh gist create --desc 'Windows bootstrap logs' $outFile 2>&1 | Select-Object -Last 1)
     if ($LASTEXITCODE -ne 0 -or -not $id) {
         Write-Warning ('gist upload failed. Report left at: {0}' -f $outFile)
         return

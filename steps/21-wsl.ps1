@@ -38,8 +38,8 @@ if (-not (Test-CommandWorks -Name 'wsl' -Arguments @('--version'))) {
 }
 
 try {
-    & wsl.exe --update 2>$null | Out-Null
-    & wsl.exe --install -d Ubuntu --no-launch 2>$null | Out-Null
+    & wsl.exe --update 2>&1 | Out-Null
+    & wsl.exe --install -d Ubuntu --no-launch 2>&1 | Out-Null
     if ($LASTEXITCODE -eq 0) { Write-Ok 'Ubuntu installed for WSL. Launch it once to set a Linux username.' }
     else { Write-Warn ("Ubuntu install exited {0}. Run: wsl --install -d Ubuntu" -f $LASTEXITCODE) }
 }

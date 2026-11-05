@@ -18,7 +18,7 @@ if (-not (Test-Path $codeDir)) { New-Item -ItemType Directory -Path $codeDir -Fo
 
 $useGh = (Test-CommandExists 'gh')
 if ($useGh) {
-    & gh auth status 2>$null | Out-Null
+    & gh auth status 2>&1 | Out-Null
     $useGh = ($LASTEXITCODE -eq 0)
 }
 
@@ -28,7 +28,7 @@ foreach ($raw in Get-Content -LiteralPath $manifest) {
 
     $destination = Join-Path $codeDir $repo
     if (Test-Path (Join-Path $destination '.git')) {
-        & git -C $destination pull --ff-only origin main 2>$null | Out-Null
+        & git -C $destination pull --ff-only origin main 2>&1 | Out-Null
         if ($LASTEXITCODE -ne 0) { Write-Warn "pull failed: $repo" }
         continue
     }

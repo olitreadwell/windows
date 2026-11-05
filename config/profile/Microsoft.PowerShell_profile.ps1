@@ -57,7 +57,7 @@ else {
 
 # bat reads like cat when piped, so this is safe inside scripts and chains.
 if (Get-Command bat -ErrorAction SilentlyContinue) {
-    Set-Alias -Name cat -Value bat -Force
+    Set-Alias -Name cat -Value bat -Option AllScope -Force
     $env:BAT_THEME = 'TwoDark'
     $env:BAT_STYLE = 'numbers,grid,header-filename'
 }
