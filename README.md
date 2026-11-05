@@ -96,10 +96,14 @@ repo; the bootstrap still installs git and clones `dotfiles` and
   mise config that step 40 links.
 - `.\bootstrap.ps1 -OptionalApps` adds the large or situational apps
   (LibreOffice, GIMP, darktable, Mixxx, qBittorrent, Beeper, Jan, Dataflare).
+- `.\bootstrap.ps1 -Wsl` enables WSL2 and Ubuntu after a restart.
+- `.\bootstrap.ps1 -RepairWindows` runs DISM, SFC and the update cache reset.
+- `.\bootstrap.ps1 -ScheduleUpdate` registers a weekly Sunday 10:00 update task.
 - `.\bootstrap.ps1 -Yes` skips interactive auth prompts with warnings.
 - `.\bootstrap.ps1 -NoAdmin` skips the elevation guard. Admin-only steps will fail.
 - `.\scripts\Update-All.ps1` updates winget packages, mise runtimes and `gh` extensions.
 - `.\scripts\Diagnose-WindowsUpdate.ps1` reports why an update is stuck, read-only.
+- `.\scripts\Remove-RecordedApps.ps1` lists what this repo installed; add `-Apply` to uninstall.
 - `.\tests\run.ps1` runs the gate on Windows.
 
 After step 40 the same two helpers run as the commands `update` and `wupdate`.

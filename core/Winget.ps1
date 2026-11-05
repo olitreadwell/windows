@@ -39,6 +39,28 @@ function Test-WingetPackage {
     return [bool](($output -join "`n") -match [regex]::Escape($Id))
 }
 
+function Register-InstalledPackage {
+    <#
+    Keeps a rollback record of everything winget actually installed. One
+    JSON line per install, so a later run can uninstall the set.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][string]$Id,
+        [Parameter(Mandatory = $true)][string]$Name
+    )
+
+    if (-not $global:OliStateDir) { return }
+    $path = Join-Path $global:OliStateDir 'installed-packages.jsonl'
+    $entry = [pscustomobject]@{
+        id   = $Id
+        name = $Name
+        at   = (Get-Date).ToString('o')
+        run  = $global:OliRunId
+    }
+    try { Add-Content -Path $path -Value ($entry | ConvertTo-Json -Compress) -Encoding UTF8 }
+    catch { Write-Verbose "install record failed: $Id" }
+}
+
 function Install-WingetPackage {
     param(
         [Parameter(Mandatory = $true)][string]$Id,
@@ -60,10 +82,11 @@ function Install-WingetPackage {
         Get-Process -Name '1Password' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
     }
 
-    $argumentLine = 'install --id {0} --exact --silent --disable-interactivity --accept-source-agreements --accept-package-agreements' -f $Id
+    # cmd /c resolves winget.exe in production and a winget.cmd stub in tests.
+    $argumentLine = '/c winget install --id {0} --exact --silent --disable-interactivity --accept-source-agreements --accept-package-agreements' -f $Id
     $timeoutMinutes = 5
     if ($env:OLI_WINGET_TIMEOUT_MINUTES -match '^\d+$') { $timeoutMinutes = [int]$env:OLI_WINGET_TIMEOUT_MINUTES }
-    $process = Start-Process -FilePath 'winget.exe' -ArgumentList $argumentLine -NoNewWindow -PassThru
+    $process = Start-Process -FilePath 'cmd.exe' -ArgumentList $argumentLine -NoNewWindow -PassThru
     if (-not $process.WaitForExit($timeoutMinutes * 60000)) {
         $process.Kill()
         Write-Warn ("winget timed out after {0} minutes: {1} ({2}). Close the app and re-run." -f $timeoutMinutes, $Name, $Id)
@@ -80,5 +103,6 @@ function Install-WingetPackage {
     if (-not (Test-WingetPackage -Id $Id)) {
         Write-Warn ("winget exited 0 but {0} is not listed by 'winget list'. Check the Start menu, or reinstall with the vendor installer." -f $Id)
     }
+    Register-InstalledPackage -Id $Id -Name $Name
     return $true
 }

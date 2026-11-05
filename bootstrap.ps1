@@ -29,6 +29,9 @@ param(
     [string]$Only,
     [switch]$Parallel,
     [switch]$OptionalApps,
+    [switch]$Wsl,
+    [switch]$RepairWindows,
+    [switch]$ScheduleUpdate,
     [switch]$SkipUpdates,
     [switch]$DryRun,
     [switch]$Yes,
@@ -50,6 +53,9 @@ Initialize-Log -RepoRoot $repoRoot
 $global:OliAssumeYes = [bool]$Yes
 $global:OliDryRun = [bool]$DryRun
 $global:OliOptionalApps = [bool]$OptionalApps
+$global:OliInstallWsl = [bool]$Wsl
+$global:OliRepairWindows = [bool]$RepairWindows
+$global:OliScheduleUpdate = [bool]$ScheduleUpdate
 Write-Log ("run: {0}" -f $global:OliRunId)
 
 # Old Windows 10 builds default to TLS 1.0, which GitHub rejects.

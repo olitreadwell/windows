@@ -194,3 +194,16 @@ sets the Remote Desktop firewall rules to `100.64.0.0/10` plus
 `LocalSubnet`. Tailscale is the transport. RustDesk stays a manual install
 because it is not in winget, and Headscale is not installed because it is a
 server, not a client.
+
+## ADR 15: Repair, WSL and scheduling are opt-in
+
+Status: accepted, 2026-11-05.
+
+Three operations are useful but too invasive to run by default: the Windows
+Update repair renames system folders and takes 30 minutes, WSL2 needs a
+reboot and conflicts with some hypervisors, and a scheduled task changes
+machine behaviour after the run ends.
+
+Decision: steps `13-repair`, `21-wsl` and `70-scheduled-update` are always in
+the plan but return immediately unless `-RepairWindows`, `-Wsl` or
+`-ScheduleUpdate` is passed. Their state checks make a second run a no-op.

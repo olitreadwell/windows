@@ -43,6 +43,7 @@ $required = @(
     'knowledge/windows-10-eol.md',
     'knowledge/migration-map.md',
     'scripts/Diagnose-WindowsUpdate.ps1',
+    'scripts/Remove-RecordedApps.ps1',
     'scripts/Show-InstalledApps.ps1',
     'scripts/Update-All.ps1',
     'repos.txt'
@@ -93,10 +94,11 @@ foreach ($name in $generations.Keys) {
 $plan = @(Get-StepPlan -RepoRoot $repoRoot)
 if ($plan.Count -eq 0) { Add-Failure 'empty step plan' }
 $expectedSteps = @(
-    '10-preflight', '12-settings', '14-remote', '15-updates', '20-winget',
-    '25-core-tools', '26-scoop', '27-apps', '30-auth', '35-1password',
-    '40-dotfiles', '45-runtimes', '47-pwsh-modules', '50-ai-tools',
-    '65-repos', '90-verify'
+    '10-preflight', '12-settings', '13-repair', '14-remote', '15-updates',
+    '20-winget', '21-wsl', '25-core-tools', '26-scoop', '27-apps',
+    '30-auth', '35-1password', '40-dotfiles', '45-runtimes',
+    '47-pwsh-modules', '50-ai-tools', '65-repos', '70-scheduled-update',
+    '90-verify'
 )
 if (($plan -join ',') -ne ($expectedSteps -join ',')) {
     Add-Failure ("step plan mismatch: {0}" -f ($plan -join ', '))
@@ -166,6 +168,44 @@ else {
 }
 
 if (-not (Get-Command Suspend-WindowsUpdate -ErrorAction SilentlyContinue)) { Add-Failure 'Suspend-WindowsUpdate is missing' }
+
+if ($env:OS -eq 'Windows_NT') {
+$fakeDir = Join-Path $testStateRoot 'fakebin'
+New-Item -ItemType Directory -Path $fakeDir -Force | Out-Null
+$shim = @(
+    '@echo off',
+    'if "%1"=="--version" (echo 1.0.0& exit /b 0)',
+    'if "%1"=="list" (',
+    '  if exist "%FAKE_WINGET_STATE%" (echo %FAKE_WINGET_ID%& exit /b 0)',
+    '  exit /b 1',
+    ')',
+    'if "%FAKE_WINGET_MODE%"=="fail" exit /b 1',
+    'if "%FAKE_WINGET_MODE%"=="hang" ping -n 30 127.0.0.1 >nul',
+    'echo installed> "%FAKE_WINGET_STATE%"',
+    'exit /b 0'
+)
+Set-Content -LiteralPath (Join-Path $fakeDir 'winget.cmd') -Value $shim -Encoding Ascii
+$savedPath = $env:Path
+$env:Path = "$fakeDir;$env:Path"
+$stateFile = Join-Path $testStateRoot 'fake-state.txt'
+$env:FAKE_WINGET_STATE = $stateFile
+$env:FAKE_WINGET_ID = 'Test.NewPackage'
+$env:FAKE_WINGET_MODE = 'ok'
+Remove-Item -LiteralPath $stateFile -Force -ErrorAction SilentlyContinue
+if (-not (Install-WingetPackage -Id 'Test.NewPackage')) { Add-Failure 'fake winget: successful install was rejected' }
+if (-not (Test-Path $stateFile)) { Add-Failure 'fake winget: install path never ran' }
+Remove-Item -LiteralPath $stateFile -Force -ErrorAction SilentlyContinue
+$env:FAKE_WINGET_MODE = 'fail'
+if (Install-WingetPackage -Id 'Test.Failing') { Add-Failure 'fake winget: failure exit was accepted' }
+Remove-Item -LiteralPath $stateFile -Force -ErrorAction SilentlyContinue
+$env:FAKE_WINGET_MODE = 'hang'
+$env:OLI_WINGET_TIMEOUT_MINUTES = '0'
+$timeoutStart = Get-Date
+if (Install-WingetPackage -Id 'Test.Hang') { Add-Failure 'fake winget: timeout was accepted' }
+if (((Get-Date) - $timeoutStart).TotalSeconds -gt 30) { Add-Failure 'fake winget: timeout did not return promptly' }
+$env:Path = $savedPath
+Remove-Item Env:FAKE_WINGET_MODE, Env:FAKE_WINGET_ID, Env:FAKE_WINGET_STATE, Env:OLI_WINGET_TIMEOUT_MINUTES -ErrorAction SilentlyContinue
+}
 
 $profilePath = Join-Path $repoRoot 'config/profile/Microsoft.PowerShell_profile.ps1'
 $hostPath = (Get-Process -Id $PID).Path
