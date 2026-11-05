@@ -5,7 +5,8 @@ Update winget packages, mise runtimes and agent CLI extensions in one pass.
 
 .DESCRIPTION
 Runs the same update commands every time, so there is one command to
-remember. It never reboots and never changes Windows Update settings.
+remember. It installs quality and security updates, never feature upgrades,
+and never reboots.
 
 .EXAMPLE
 .\scripts\Update-All.ps1 -DryRun
@@ -85,6 +86,29 @@ if (Test-Tool 'codex') {
         $completion | Set-Content -Path $completionPath -Encoding UTF8
         Write-Host ("  refreshed: {0}" -f $completionPath)
     }
+}
+
+Write-Section 'Windows Update'
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not (Get-Command Get-WindowsUpdate -ErrorAction SilentlyContinue)) {
+    if (Get-Module -ListAvailable -Name PSWindowsUpdate) { Import-Module PSWindowsUpdate -ErrorAction SilentlyContinue }
+}
+$rebootPending = Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending'
+if (-not (Get-Command Get-WindowsUpdate -ErrorAction SilentlyContinue)) {
+    Write-Warning 'PSWindowsUpdate is missing. Run: .\bootstrap.ps1 -Only 15-updates'
+}
+elseif (-not $isAdmin) {
+    Write-Warning 'Windows Update needs admin; skipped in this session'
+}
+elseif ($rebootPending) {
+    Write-Warning 'A restart is pending; Windows Update skipped'
+}
+elseif ($DryRun) {
+    Get-WindowsUpdate -NotCategory 'Upgrades', 'Feature Packs' -ErrorAction SilentlyContinue
+}
+else {
+    # Feature upgrades stay a human decision; quality and security updates do not.
+    Install-WindowsUpdate -NotCategory 'Upgrades', 'Feature Packs' -AcceptAll -AutoReboot:$false -ErrorAction SilentlyContinue
 }
 
 Write-Section 'PowerShell modules'
