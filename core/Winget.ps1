@@ -86,15 +86,21 @@ function Install-WingetPackage {
     $argumentLine = '/c winget install --id {0} --exact --silent --disable-interactivity --accept-source-agreements --accept-package-agreements' -f $Id
     $timeoutMinutes = 5
     if ($env:OLI_WINGET_TIMEOUT_MINUTES -match '^\d+$') { $timeoutMinutes = [int]$env:OLI_WINGET_TIMEOUT_MINUTES }
-    $process = Start-Process -FilePath 'cmd.exe' -ArgumentList $argumentLine -NoNewWindow -PassThru
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = 'cmd.exe'
+    $startInfo.Arguments = $argumentLine
+    $startInfo.UseShellExecute = $false
+    $process = [System.Diagnostics.Process]::Start($startInfo)
     if (-not $process.WaitForExit($timeoutMinutes * 60000)) {
-        $process.Kill()
+        try { $process.Kill() } catch { }
         Write-Warn ("winget timed out after {0} minutes: {1} ({2}). Close the app and re-run." -f $timeoutMinutes, $Name, $Id)
         Write-Warn 'Override with: $env:OLI_WINGET_TIMEOUT_MINUTES = 15'
         return $false
     }
-    if ($process.ExitCode -ne 0) {
-        Write-Warn "winget failed: $Name ($Id) exit $($process.ExitCode)"
+    $process.WaitForExit()
+    $exitCode = $process.ExitCode
+    if ($exitCode -ne 0) {
+        Write-Warn "winget failed: $Name ($Id) exit $exitCode"
         return $false
     }
 
