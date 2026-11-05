@@ -133,6 +133,10 @@ Repeat until it reports no pending updates, then continue with
 - Set `OLLAMA_CLOUD_MAX_API_KEY` for Codex if it was not entered during step
   50. Get the key from 1Password on the Mac.
 - Run `gh auth status` and `claude auth login`.
+- On an unpatched Windows 10 install the default browser may be the old
+  EdgeHTML build, which cannot render the GitHub device page. Set Zen or
+  Chrome as the default first, or open `https://github.com/login/device`
+  in that browser and type the code that `gh auth login --web` prints.
 - Open a new PowerShell 7 window and check `starship --version` and
   `mise ls`.
 - Set Windows Terminal > Profiles > Defaults > Appearance > Font face to
