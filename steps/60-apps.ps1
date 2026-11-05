@@ -19,6 +19,15 @@ else {
     Write-Ok 'apps installed'
 }
 
+$missingApps = @()
+foreach ($id in $packages) {
+    if (-not (Test-WingetPackage -Id $id)) { $missingApps += $id }
+}
+if ($missingApps.Count -gt 0) {
+    Write-Warn ("winget does not list these apps: {0}" -f ($missingApps -join ', '))
+    Write-Warn 'Open the Start menu and search by name before reinstalling.'
+}
+
 # Windows validates the default-browser choice with a hash and ignores a
 # scripted write, so the best a script can do is detect the gap and open the
 # right page. Zen is a Firefox fork and registers itself as a candidate.

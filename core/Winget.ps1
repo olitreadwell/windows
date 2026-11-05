@@ -62,5 +62,8 @@ function Install-WingetPackage {
 
     Write-Ok "installed: $Name ($Id)"
     Update-SessionPath
+    if (-not (Test-WingetPackage -Id $Id)) {
+        Write-Warn ("winget exited 0 but {0} is not listed by 'winget list'. Check the Start menu, or reinstall with the vendor installer." -f $Id)
+    }
     return $true
 }
