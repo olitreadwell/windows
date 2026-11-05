@@ -4,6 +4,10 @@ $paths = @(
     (Join-Path $HOME '.local\bin'),
     (Join-Path $HOME '.agents\bin')
 )
+# Git for Windows ships bash, less and the GNU tools here, but does not put
+# this directory on PATH. The ai-harness ledger and git hooks need bash.
+$gitTools = Join-Path $env:ProgramFiles 'Git\usr\bin'
+if (Test-Path $gitTools) { $paths += $gitTools }
 foreach ($path in $paths) {
     if ((Test-Path $path) -and ($env:Path -notlike "*$path*")) {
         $env:Path = "$path;$env:Path"

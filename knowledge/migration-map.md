@@ -22,6 +22,18 @@ Where each piece of the current setup goes. Status values:
 | `55-macos-settings` | none yet | Deferred |
 | `60-runtimes` mise | `45-runtimes` mise. uv is core; fnm and bun are fallbacks only if mise fails | Adapted |
 | `70-apps` mas | `27-apps` winget | Adapted |
+
+## What comes from `dotfiles` and what does not
+
+The Windows repo clones `dotfiles` but consumes only the portable pieces:
+
+- `.gitignore_global`, `gitmessage`, `gh/config.yml`
+- `git_hooks`, which are bash scripts. Git for Windows runs hooks with its
+  bundled bash, and these hooks use no macOS-only commands.
+
+Shell, terminal and editor configs come from this repo instead. `ai-harness`
+is fully portable: skills are directories linked with junctions, and its
+`work` ledger is bash, so the profile puts Git's `usr\bin` on PATH.
 | `75-apps-config` plist restore | none yet | Deferred |
 | `76-manual-apps` DMG installs | none yet | Deferred |
 | `80-auth` gh, claude, codex | `30-auth` and `50-ai-tools` | Ported |
