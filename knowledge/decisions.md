@@ -258,3 +258,25 @@ wuauserv, bits, cryptsvc, msiserver, dosvc and usosvc, renames
 the rollback story honest and the old folders are left on disk for the user to
 remove. The step never reboots. `16-win10` still refuses to start while a
 restart is pending, so the order is reset, restart, upgrade.
+
+## ADR 19: SSH from the Mac replaces relaying error messages
+
+Status: accepted, 2026-11-05.
+
+Fixing the Windows machine by reading typed error messages from another
+computer costs a round trip per failure. RDP needs the account password and a
+GUI client, and the account password was lost once. SSH needs neither a
+password nor a GUI.
+
+Decision: step `18-ssh` is opt-in behind `-EnableSsh`. It installs the
+OpenSSH.Server capability, starts `sshd` at boot, sets PowerShell as the
+default shell, adds the public key in `config/ssh/authorized_key.pub` to
+`administrators_authorized_keys` with the ACL Windows requires, and limits
+port 22 to `100.64.0.0/10` plus `LocalSubnet`.
+
+It also sets `LocalAccountTokenFilterPolicy=1`, because a network logon from
+a local admin otherwise gets a filtered token and cannot run the steps. That
+is a real widening of remote privilege, and the firewall scope is what keeps
+it acceptable. The private key stays on the Mac at
+`~/.ssh/id_ed25519_windows` with mode 600. Password authentication stays on
+until the key is proven, then it can be turned off in `sshd_config`.

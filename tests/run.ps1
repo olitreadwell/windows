@@ -94,7 +94,7 @@ foreach ($name in $generations.Keys) {
 $plan = @(Get-StepPlan -RepoRoot $repoRoot)
 if ($plan.Count -eq 0) { Add-Failure 'empty step plan' }
 $expectedSteps = @(
-    '10-preflight', '11-fix-update', '12-settings', '13-repair', '14-remote', '15-updates', '16-win10', '17-win11',
+    '10-preflight', '11-fix-update', '12-settings', '13-repair', '14-remote', '15-updates', '16-win10', '17-win11', '18-ssh',
     '20-winget', '21-wsl', '25-core-tools', '26-scoop', '27-apps',
     '30-auth', '35-1password', '40-dotfiles', '45-runtimes',
     '47-pwsh-modules', '50-ai-tools', '65-repos', '70-scheduled-update',

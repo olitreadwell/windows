@@ -99,6 +99,7 @@ repo; the bootstrap still installs git and clones `dotfiles` and
 - `.\bootstrap.ps1 -Wsl` enables WSL2 and Ubuntu after a restart.
 - `.\bootstrap.ps1 -RepairWindows` runs DISM, SFC and the update cache reset.
 - `.\bootstrap.ps1 -FixUpdate` stops the update services, renames the download cache and staging folders, and restarts them. Run it, restart, then upgrade.
+- `.\bootstrap.ps1 -EnableSsh` installs the OpenSSH server, adds the repo key, and limits port 22 to Tailscale.
 - `.\bootstrap.ps1 -Windows10` downloads Microsoft's Windows 10 Update Assistant and runs the 22H2 upgrade.
 - `.\bootstrap.ps1 -Windows11` downloads Microsoft's Installation Assistant and runs the Windows 11 upgrade, bypassing Windows Update.
 - `.\bootstrap.ps1 -ScheduleUpdate` registers a weekly Sunday 10:00 update task.

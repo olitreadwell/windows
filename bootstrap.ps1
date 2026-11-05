@@ -40,6 +40,7 @@ param(
     [switch]$FixUpdate,
     [switch]$NoReboot,
     [switch]$NoLogUpload,
+    [switch]$EnableSsh,
     [switch]$Windows10,
     [switch]$Windows11,
     [switch]$ScheduleUpdate,
@@ -70,6 +71,7 @@ $global:OliRepairWindows = [bool]$RepairWindows
 $global:OliFixUpdate = [bool]$FixUpdate
 $global:OliNoReboot = [bool]$NoReboot
 $global:OliNoLogUpload = [bool]$NoLogUpload
+$global:OliEnableSsh = [bool]$EnableSsh
 $global:OliWindows10 = [bool]$Windows10
 $global:OliWindows11 = [bool]$Windows11
 $global:OliScheduleUpdate = [bool]$ScheduleUpdate
