@@ -1,5 +1,7 @@
-# Opt-in Windows 10 22H2 upgrade. Downloads Microsoft's Update Assistant
-# and runs it, so the upgrade does not depend on Windows Update succeeding.
+# Opt-in Windows 10 22H2 upgrade. Downloads Microsoft's Update Assistant and
+# runs it, so the upgrade does not depend on Windows Update succeeding.
+# When a restart is pending it resets the update state, schedules a one-time
+# elevated resume at next logon, and restarts, so the whole path is one command.
 # Only runs with -Windows10.
 Set-StrictMode -Version 2.0
 
@@ -22,13 +24,46 @@ if (-not (Test-IsAdmin)) {
     return
 }
 
+$taskName = 'OliWindows10Upgrade'
+$resumeFlag = Join-Path $global:OliStateDir 'win10-resume.flag'
+
+# The resume task fired; it is one-shot, so remove it before doing anything.
+$existing = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+if ($existing) {
+    Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
+    Write-Log 'resume task removed'
+}
+
+if (Test-RebootPending -and -not (Test-Path $resumeFlag)) {
+    Write-Warn 'A restart is pending, which is what keeps the stuck 25 percent install retrying.'
+    Reset-WindowsUpdateState -Reason 'stuck update reset' | Out-Null
+    Set-Content -Path $resumeFlag -Value (Get-Date).ToString('o') -Encoding UTF8
+
+    $bootstrap = Join-Path $global:OliRepoRoot 'bootstrap.ps1'
+    $arguments = '-NoProfile -ExecutionPolicy Bypass -File "{0}" -Only 16-win10 -Windows10 -Yes' -f $bootstrap
+    $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $arguments
+    $trigger = New-ScheduledTaskTrigger -AtLogOn -User ("{0}\{1}" -f $env:USERDOMAIN, $env:USERNAME)
+    $principal = New-ScheduledTaskPrincipal -UserId ("{0}\{1}" -f $env:USERDOMAIN, $env:USERNAME) -RunLevel Highest -LogonType Interactive
+    Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Force | Out-Null
+    Write-Ok 'scheduled the upgrade to continue automatically after the next sign-in'
+
+    if ($global:OliNoReboot) {
+        Write-Warn 'NoReboot set. Restart yourself, then the upgrade starts at sign-in.'
+        return
+    }
+    Write-Warn 'Restarting in 45 seconds. Save your work. Cancel with: shutdown /a'
+    & shutdown.exe /r /t 45 /c "Windows 10 upgrade continues after restart"
+    return
+}
+
+if (Test-Path $resumeFlag) {
+    Remove-Item -LiteralPath $resumeFlag -Force -ErrorAction SilentlyContinue
+    Write-Log 'resuming the upgrade after the restart'
+}
+
 $freeGb = [math]::Round((Get-PSDrive -Name $env:SystemDrive.TrimEnd(':')).Free / 1GB, 1)
 if ($freeGb -lt 20) {
     Write-Fail ("only {0} GB free; the upgrade needs about 20 GB" -f $freeGb)
-}
-
-if (Test-RebootPending) {
-    Write-Warn 'A restart is pending. The assistant will ask for it again after it starts.'
 }
 
 $machine = Get-MachineInfo

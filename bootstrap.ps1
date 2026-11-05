@@ -37,6 +37,8 @@ param(
     [switch]$OptionalApps,
     [switch]$Wsl,
     [switch]$RepairWindows,
+    [switch]$FixUpdate,
+    [switch]$NoReboot,
     [switch]$Windows10,
     [switch]$Windows11,
     [switch]$ScheduleUpdate,
@@ -64,6 +66,8 @@ $global:OliDryRun = [bool]$DryRun
 $global:OliOptionalApps = [bool]$OptionalApps
 $global:OliInstallWsl = [bool]$Wsl
 $global:OliRepairWindows = [bool]$RepairWindows
+$global:OliFixUpdate = [bool]$FixUpdate
+$global:OliNoReboot = [bool]$NoReboot
 $global:OliWindows10 = [bool]$Windows10
 $global:OliWindows11 = [bool]$Windows11
 $global:OliScheduleUpdate = [bool]$ScheduleUpdate

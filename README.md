@@ -86,7 +86,7 @@ repo; the bootstrap still installs git and clones `dotfiles` and
 - `.\bootstrap.ps1` provisions the machine, idempotently.
 - `.\bootstrap.ps1 -DryRun` prints the plan and exits.
 - `.\bootstrap.ps1 -From 40-dotfiles` resumes from a step.
-- `.\bootstrap.ps1 -Only 90-verify` runs one step.
+- `.\bootstrap.ps1 -Only 90-verify` runs one step. Comma lists work: `-Only 40-dotfiles,50-ai-tools`.
 - `.\bootstrap.ps1 -Only 26-scoop` prints the Scoop command (run it from a normal window).
 - `.\bootstrap.ps1 -SkipUpdates` runs every step except Windows Update and
   pauses updates for 7 days, so a stuck feature install stops retrying.
@@ -98,6 +98,7 @@ repo; the bootstrap still installs git and clones `dotfiles` and
   (LibreOffice, GIMP, darktable, Mixxx, qBittorrent, Beeper, Jan, Dataflare).
 - `.\bootstrap.ps1 -Wsl` enables WSL2 and Ubuntu after a restart.
 - `.\bootstrap.ps1 -RepairWindows` runs DISM, SFC and the update cache reset.
+- `.\bootstrap.ps1 -FixUpdate` stops the update services, renames the download cache and staging folders, and restarts them. Run it, restart, then upgrade.
 - `.\bootstrap.ps1 -Windows10` downloads Microsoft's Windows 10 Update Assistant and runs the 22H2 upgrade.
 - `.\bootstrap.ps1 -Windows11` downloads Microsoft's Installation Assistant and runs the Windows 11 upgrade, bypassing Windows Update.
 - `.\bootstrap.ps1 -ScheduleUpdate` registers a weekly Sunday 10:00 update task.

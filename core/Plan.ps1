@@ -12,7 +12,8 @@ function Get-StepPlan {
     $steps = @(Get-ChildItem -Path $stepsDir -Filter '*.ps1' | Sort-Object { [int](($_.BaseName -split '-')[0]) } | ForEach-Object { $_.BaseName })
 
     if ($Only) {
-        return @($steps | Where-Object { $_ -eq $Only })
+        $wanted = @($Only -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+        return @($steps | Where-Object { $wanted -contains $_ })
     }
 
     if ($From) {

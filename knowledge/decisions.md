@@ -241,3 +241,20 @@ build is already 19045, requires 20 GB free, downloads Microsoft's Windows 10
 Update Assistant, verifies the Authenticode signature, and runs it. It never
 reboots by itself. `17-win11` stays separate so the two upgrades are never
 queued in one run.
+
+## ADR 18: A wedged feature update gets a reset step
+
+Status: accepted, 2026-11-05.
+
+The 22H2 install sat at 25 percent for hours and retried across reboots, so
+waiting is not a fix and neither is the Windows Update UI. The download cache
+and the two staging folders are the state that makes it retry the same broken
+attempt.
+
+Decision: step `11-fix-update` is opt-in behind `-FixUpdate`. It stops
+wuauserv, bits, cryptsvc, msiserver, dosvc and usosvc, renames
+`SoftwareDistribution`, `catroot2`, `$WINDOWS.~BT` and `$WINDOWS.~WS` to
+`*.old-<timestamp>`, then restarts the services. Renaming, not deleting, keeps
+the rollback story honest and the old folders are left on disk for the user to
+remove. The step never reboots. `16-win10` still refuses to start while a
+restart is pending, so the order is reset, restart, upgrade.

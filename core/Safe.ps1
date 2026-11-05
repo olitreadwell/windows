@@ -277,3 +277,54 @@ function Update-SessionPath {
     $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
     $env:Path = "$machinePath;$userPath"
 }
+
+function Reset-WindowsUpdateState {
+    <#
+    Renames the Windows Update download cache and the feature-update staging
+    folders, then restarts the services. Renaming keeps the old state for
+    rollback; nothing is deleted. Safe to run twice.
+    #>
+    param([string]$Reason = 'update reset')
+
+    if (-not (Test-IsAdmin)) {
+        Write-Warn ("{0} needs admin. Run from an elevated shell." -f $Reason)
+        return $false
+    }
+
+    $stamp = Get-Date -Format 'yyyyMMddHHmmss'
+    $services = @('wuauserv', 'bits', 'cryptsvc', 'msiserver', 'dosvc', 'usosvc')
+    foreach ($name in $services) {
+        $service = Get-Service -Name $name -ErrorAction SilentlyContinue
+        if (-not $service -or $service.Status -eq 'Stopped') { continue }
+        try { Stop-Service -Name $name -Force -ErrorAction Stop }
+        catch { Write-Warn ("could not stop {0}: {1}" -f $name, $_.Exception.Message) }
+    }
+    Write-Ok 'update services stopped'
+
+    $paths = @(
+        (Join-Path $env:SystemRoot 'SoftwareDistribution'),
+        (Join-Path $env:SystemRoot 'System32\catroot2'),
+        (Join-Path $env:SystemDrive '$WINDOWS.~BT'),
+        (Join-Path $env:SystemDrive '$WINDOWS.~WS')
+    )
+    foreach ($path in $paths) {
+        if (-not (Test-Path -LiteralPath $path)) { continue }
+        $backup = "{0}.old-{1}" -f $path, $stamp
+        try {
+            Move-Item -LiteralPath $path -Destination $backup -Force -ErrorAction Stop
+            Write-Ok ("moved aside: {0}" -f $path)
+        }
+        catch {
+            Write-Warn ("could not move {0}: {1}" -f $path, $_.Exception.Message)
+        }
+    }
+
+    foreach ($name in $services) {
+        $service = Get-Service -Name $name -ErrorAction SilentlyContinue
+        if (-not $service) { continue }
+        try { Start-Service -Name $name -ErrorAction Stop }
+        catch { Write-Warn ("could not start {0}: {1}" -f $name, $_.Exception.Message) }
+    }
+    Write-Ok 'update services restarted'
+    return $true
+}
