@@ -156,7 +156,7 @@ foreach ($needle in @('errors.log', 'Save-RunSummary', 'OliRunId')) {
 }
 
 $settingsText = Get-Content -Path (Join-Path $repoRoot 'steps/12-settings.ps1') -Raw
-foreach ($needle in @('LongPathsEnabled', 'AllowDevelopmentWithoutDevLicense', 'EnableClipboardHistory', 'LaunchTo', 'RemoteSigned', 'PUAProtection', 'FlipFlopWheel')) {
+foreach ($needle in @('LongPathsEnabled', 'AllowDevelopmentWithoutDevLicense', 'EnableClipboardHistory', 'LaunchTo', 'RemoteSigned', 'PUAProtection', 'FlipFlopWheel', 'AllowTelemetry', 'BingSearchEnabled')) {
     if ($settingsText -notmatch [regex]::Escape($needle)) { Add-Failure ("settings step missing: {0}" -f $needle) }
 }
 

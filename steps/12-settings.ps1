@@ -125,6 +125,33 @@ catch {
     Write-Warn ("Defender preference not changed: {0}" -f $_.Exception.Message)
 }
 
+# Privacy defaults. Registry only, no apps removed, all reversible.
+$privacy = @(
+    @{ Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection'; Name = 'AllowTelemetry'; Value = 0 },
+    @{ Path = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo'; Name = 'Enabled'; Value = 0 },
+    @{ Path = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Privacy'; Name = 'TailoredExperiencesWithDiagnosticDataEnabled'; Value = 0 },
+    @{ Path = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'; Name = 'ShowSyncProviderNotifications'; Value = 0 },
+    @{ Path = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'; Name = 'SilentInstalledAppsEnabled'; Value = 0 },
+    @{ Path = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'; Name = 'OemPreInstalledAppsEnabled'; Value = 0 },
+    @{ Path = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'; Name = 'PreInstalledAppsEnabled'; Value = 0 },
+    @{ Path = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'; Name = 'SubscribedContent-338388Enabled'; Value = 0 },
+    @{ Path = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'; Name = 'SubscribedContent-338389Enabled'; Value = 0 },
+    @{ Path = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Search'; Name = 'BingSearchEnabled'; Value = 0 },
+    @{ Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'; Name = 'AllowCortana'; Value = 0 },
+    @{ Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'; Name = 'EnableActivityFeed'; Value = 0 },
+    @{ Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'; Name = 'PublishUserActivities'; Value = 0 },
+    @{ Path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'; Name = 'UploadUserActivities'; Value = 0 }
+)
+$privacyChanged = 0
+foreach ($item in $privacy) {
+    if (-not (Test-Path $item.Path)) { New-Item -Path $item.Path -Force | Out-Null }
+    if ((Get-RegistryValue -Path $item.Path -Name $item.Name) -ne $item.Value) {
+        Set-ItemProperty -Path $item.Path -Name $item.Name -Value $item.Value -Type DWord -ErrorAction SilentlyContinue
+        if ((Get-RegistryValue -Path $item.Path -Name $item.Name) -eq $item.Value) { $privacyChanged++ }
+    }
+}
+Write-Ok ("privacy settings: {0} changed, {1} already set" -f $privacyChanged, ($privacy.Count - $privacyChanged))
+
 # Reverse the scroll direction, the same way macOS feels. Windows 10 has no
 # Settings toggle for this, so it goes on each HID mouse device. Unplug and
 # replug the mouse, or restart, if the change does not apply immediately.
