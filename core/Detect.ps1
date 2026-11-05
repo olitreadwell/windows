@@ -21,11 +21,9 @@ function Get-MachineInfo {
     $video = @(Get-CimInstance Win32_VideoController | ForEach-Object { $_.Name })
 
     $build = [int]$os.BuildNumber
-    $displayVersion = ''
-    try {
-        $displayVersion = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -ErrorAction Stop).DisplayVersion
-    }
-    catch { Write-Verbose 'display version unavailable' }
+    $versionKey = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
+    $displayVersion = [string](Get-RegistryValue -Path $versionKey -Name DisplayVersion)
+    $updateBuildRevision = Get-RegistryValue -Path $versionKey -Name UBR
 
     $systemDrive = $env:SystemDrive.TrimEnd(':')
     $freeGb = 0
@@ -77,7 +75,7 @@ function Get-MachineInfo {
         WindowsVersion      = $os.Version
         DisplayVersion      = $displayVersion
         BuildNumber         = $build
-        UpdateBuildRevision = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -ErrorAction SilentlyContinue).UBR
+        UpdateBuildRevision = $updateBuildRevision
         Architecture        = $os.OSArchitecture
         CpuName             = $cpu.Name
         CpuCores            = $cpu.NumberOfCores

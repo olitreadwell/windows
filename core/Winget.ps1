@@ -22,7 +22,7 @@ function Get-PackageSection {
 }
 
 function Test-WingetAvailable {
-    if (-not (Test-CommandExists 'winget')) {
+    if (-not (Test-CommandWorks -Name 'winget')) {
         Write-Warn 'winget is not on PATH. Install App Installer, then re-run 20-winget.'
         return $false
     }

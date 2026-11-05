@@ -8,9 +8,11 @@ if (-not (Test-IsAdmin)) {
 }
 
 # Long paths. Deep node_modules and git checkouts fail without this.
+$changed = $false
 $fileSystem = 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem'
 if ((Get-RegistryValue -Path $fileSystem -Name LongPathsEnabled) -ne 1) {
     Set-ItemProperty -Path $fileSystem -Name LongPathsEnabled -Value 1 -Type DWord
+    $changed = $true
     Write-Ok 'long paths enabled'
 }
 else {
@@ -23,6 +25,7 @@ $devMode = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock'
 if (-not (Test-Path $devMode)) { New-Item -Path $devMode -Force | Out-Null }
 if ((Get-RegistryValue -Path $devMode -Name AllowDevelopmentWithoutDevLicense) -ne 1) {
     Set-ItemProperty -Path $devMode -Name AllowDevelopmentWithoutDevLicense -Value 1 -Type DWord
+    $changed = $true
     Write-Ok 'developer mode enabled'
 }
 else {
@@ -34,6 +37,7 @@ $advanced = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
 if (-not (Test-Path $advanced)) { New-Item -Path $advanced -Force | Out-Null }
 if ((Get-RegistryValue -Path $advanced -Name HideFileExt) -ne 0) {
     Set-ItemProperty -Path $advanced -Name HideFileExt -Value 0 -Type DWord
+    $changed = $true
     Write-Ok 'file extensions shown'
 }
 else {
@@ -41,6 +45,7 @@ else {
 }
 if ((Get-RegistryValue -Path $advanced -Name FullPath) -ne 1) {
     Set-ItemProperty -Path $advanced -Name FullPath -Value 1 -Type DWord
+    $changed = $true
     Write-Ok 'full path shown in Explorer title'
 }
 else {
@@ -50,6 +55,7 @@ else {
 # Explorer opens This PC instead of Quick Access.
 if ((Get-RegistryValue -Path $advanced -Name LaunchTo) -ne 1) {
     Set-ItemProperty -Path $advanced -Name LaunchTo -Value 1 -Type DWord
+    $changed = $true
     Write-Ok 'Explorer opens This PC'
 }
 else {
@@ -61,6 +67,7 @@ $clipboard = 'HKCU:\Software\Microsoft\Clipboard'
 if (-not (Test-Path $clipboard)) { New-Item -Path $clipboard -Force | Out-Null }
 if ((Get-RegistryValue -Path $clipboard -Name EnableClipboardHistory) -ne 1) {
     Set-ItemProperty -Path $clipboard -Name EnableClipboardHistory -Value 1 -Type DWord
+    $changed = $true
     Write-Ok 'clipboard history enabled (Win+V)'
 }
 else {
@@ -72,6 +79,7 @@ $delivery = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryMana
 if (Test-Path $delivery) {
     if ((Get-RegistryValue -Path $delivery -Name SoftLandingEnabled) -ne 0) {
         Set-ItemProperty -Path $delivery -Name SoftLandingEnabled -Value 0 -Type DWord
+        $changed = $true
         Write-Ok 'Windows tips and suggestions turned off'
     }
     else {
@@ -79,9 +87,41 @@ if (Test-Path $delivery) {
     }
 }
 
+# The current user may run local scripts. Downloaded scripts still need a
+# signature, so RemoteSigned is the usual developer setting.
+try {
+    $policy = Get-ExecutionPolicy -Scope CurrentUser
+    if ($policy -ne 'RemoteSigned' -and $policy -ne 'Unrestricted' -and $policy -ne 'Bypass') {
+        Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force -ErrorAction Stop
+        Write-Ok 'execution policy set to RemoteSigned for the current user'
+        $changed = $true
+    }
+    else {
+        Write-Ok ("execution policy already permissive: {0}" -f $policy)
+    }
+}
+catch {
+    Write-Warn ("execution policy not changed: {0}" -f $_.Exception.Message)
+}
+
+# Defender: block potentially unwanted applications, not just known malware.
+try {
+    $preference = Get-MpPreference -ErrorAction Stop
+    if ($preference.PUAProtection -ne 1) {
+        Set-MpPreference -PUAProtection Enabled -ErrorAction Stop
+        Write-Ok 'Defender PUA protection enabled'
+    }
+    else {
+        Write-Ok 'Defender PUA protection already enabled'
+    }
+}
+catch {
+    Write-Warn ("Defender preference not changed: {0}" -f $_.Exception.Message)
+}
+
 # Restart Explorer so the Explorer changes appear without a sign-out.
 $explorer = Get-Process -Name explorer -ErrorAction SilentlyContinue
-if ($explorer) {
+if ($changed -and $explorer) {
     Write-Log 'restarting Explorer to apply the folder settings'
     Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 2

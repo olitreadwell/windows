@@ -12,6 +12,27 @@ function Test-CommandExists {
     return [bool](Get-Command $Name -ErrorAction SilentlyContinue)
 }
 
+function Test-CommandWorks {
+    <#
+    A command can resolve and still be a broken WindowsApps alias stub, which
+    is how pwsh failed with "no applicable licenses" on a real machine.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string[]]$Arguments = @('--version')
+    )
+
+    if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) { return $false }
+    try {
+        $output = & $Name @Arguments 2>$null
+        if ($LASTEXITCODE -ne 0) { return $false }
+        return (($output -join ' ').Trim().Length -gt 0)
+    }
+    catch {
+        return $false
+    }
+}
+
 function Get-RegistryValue {
     <#
     Reads one registry value and returns $null when the key or value is

@@ -109,6 +109,10 @@ These are Windows-first tools that have no macOS counterpart in the
 | just | `Casey.Just` | Task runner, the `make` replacement for projects |
 | direnv | `direnv.direnv` | Per-directory environment variables, pairs with mise |
 | xh | `ducaale.xh` | Fast HTTP client, friendlier than curl |
+| difftastic | `Wilfred.difftastic` | Syntax-aware structural diff |
+| ruff | `astral-sh.ruff` | Python lint and format, pairs with uv |
+| bottom | `Clement.bottom` | btop-style CPU, memory and network monitor |
+| hyperfine | `sharkdp.hyperfine` | Command benchmarking with warmup |
 
 ### Desktop
 
@@ -123,6 +127,14 @@ These are Windows-first tools that have no macOS counterpart in the
 | CrystalDiskInfo | `CrystalDewWorld.CrystalDiskInfo` | SSD health and temperature on old hardware |
 | VLC | `VideoLAN.VLC` | Plays every codec |
 | Fluent Reader | `yang991178.fluent-reader` | RSS reader, the NetNewsWire stand-in |
+| QuickLook | `QL-Win.QuickLook` | Spacebar file preview, like Finder |
+
+Considered and not installed: WSL2 (`Microsoft.WSL`, deferred), GlazeWM
+(`glzr-io.glazewm`, conflicts with FancyZones), Flow Launcher
+(`Flow-Launcher.Flow-Launcher`, PowerToys Run covers it), Files
+(`FilesCommunity.Files`, Explorer plus Everything covers it), Syncthing
+(sync deletions need a deliberate setup), Deskflow and LocalSend (LAN
+sharing needs a firewall decision).
 
 Optional, not installed: DBeaver (`DBeaver.DBeaver`) for database GUIs,
 Docker Desktop (needs WSL2), minikube, PostgreSQL 16, and VLC was kept

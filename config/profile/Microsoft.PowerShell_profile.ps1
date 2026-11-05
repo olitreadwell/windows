@@ -155,8 +155,12 @@ $codexCompletion = Join-Path $HOME '.codex\completions.ps1'
 if (Test-Path $codexCompletion) { . $codexCompletion }
 
 $psfzf = Get-Module -ListAvailable -Name PSFzf | Select-Object -First 1
+$psfzfLoaded = $false
 if ($psfzf) {
     Import-Module PSFzf -ErrorAction SilentlyContinue
+    $psfzfLoaded = [bool](Get-Module PSFzf)
+}
+if ($psfzfLoaded) {
     if (Get-Command Set-PsFzfOption -ErrorAction SilentlyContinue) {
         Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r' -ErrorAction SilentlyContinue
         Set-PsFzfOption -EnableAliasFuzzyEdit -EnableAliasFuzzyGitStatus -ErrorAction SilentlyContinue
@@ -189,8 +193,16 @@ if (Get-Module -ListAvailable -Name Terminal-Icons) {
     Import-Module Terminal-Icons -ErrorAction SilentlyContinue
 }
 
-if (Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue) {
-    Set-PSReadLineOption -PredictionSource History -ErrorAction SilentlyContinue
-    Set-PSReadLineOption -PredictionViewStyle ListView -ErrorAction SilentlyContinue
-    Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete -ErrorAction SilentlyContinue
+# Windows PowerShell 5.1 ships PSReadLine 1.2, which has no prediction
+# parameters. Binding errors ignore -ErrorAction, so check the parameters.
+$psReadLine = Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue
+if ($psReadLine) {
+    if ($psReadLine.Parameters.ContainsKey('PredictionSource')) {
+        Set-PSReadLineOption -PredictionSource History -ErrorAction SilentlyContinue
+    }
+    if ($psReadLine.Parameters.ContainsKey('PredictionViewStyle')) {
+        Set-PSReadLineOption -PredictionViewStyle ListView -ErrorAction SilentlyContinue
+    }
+    try { Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete -ErrorAction Stop }
+    catch { }
 }

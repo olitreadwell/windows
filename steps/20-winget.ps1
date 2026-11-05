@@ -3,10 +3,22 @@ Set-StrictMode -Version 2.0
 
 $info = Get-MachineInfo
 
-if (Test-CommandExists 'winget') {
+if (Test-CommandWorks -Name 'winget') {
     Write-Ok ("winget present: {0}" -f ((& winget --version) -join ' '))
 }
 else {
+    $appInstaller = Get-AppxPackage -Name 'Microsoft.DesktopAppInstaller' -ErrorAction SilentlyContinue
+    if ($appInstaller) {
+        Update-SessionPath
+        if (Test-CommandWorks -Name 'winget') {
+            Write-Ok ("winget present: {0}" -f ((& winget --version) -join ' '))
+            return
+        }
+        Write-Warn 'App Installer is installed but winget is not runnable in this window.'
+        Write-Warn 'Open a new terminal and run: winget --version'
+        Write-Fail 'winget is not usable in this session'
+    }
+
     if ($info.BuildNumber -lt 17763) {
         Write-Fail ("winget needs Windows 10 1809 or newer. This machine is build {0}. Update Windows first." -f $info.BuildNumber)
     }
@@ -17,7 +29,7 @@ else {
         Invoke-WebRequest -Uri 'https://aka.ms/getwinget' -OutFile $bundle -UseBasicParsing -ErrorAction Stop
         Add-AppxPackage -Path $bundle -ErrorAction Stop
         Update-SessionPath
-        if (-not (Test-CommandExists 'winget')) {
+        if (-not (Test-CommandWorks -Name 'winget')) {
             Write-Fail 'App Installer installed but winget is still not on PATH. Open a new terminal and re-run step 20.'
         }
         Write-Ok 'winget installed'

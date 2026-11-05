@@ -67,9 +67,32 @@ if ($pending.Count -eq 0) {
 }
 
 Write-Log ("{0} update(s) pending; installing without feature upgrades or automatic reboot" -f $pending.Count)
-Install-WindowsUpdate -NotCategory 'Upgrades', 'Feature Packs' -AcceptAll -IgnoreReboot -Confirm:$false -ErrorAction Continue
+$results = @()
+try {
+    $results = @(Install-WindowsUpdate -NotCategory 'Upgrades', 'Feature Packs' -AcceptAll -IgnoreReboot -Confirm:$false -ErrorAction Stop)
+}
+catch {
+    Write-Warn ("update install failed: {0}" -f $_.Exception.Message)
+    Write-Warn 'Open Settings > Update & Security > Windows Update and read the error code.'
+    Write-Warn 'Details: .\scripts\Diagnose-WindowsUpdate.ps1'
+    return
+}
+
+$failedUpdates = @($results | Where-Object { $_.PSObject.Properties['Result'] -and $_.Result -eq 'Failed' })
+if ($failedUpdates.Count -gt 0) {
+    Write-Fail ("{0} update(s) failed. Run: .\scripts\Diagnose-WindowsUpdate.ps1" -f $failedUpdates.Count)
+}
 
 if (Test-RebootPending) {
     Write-Fail 'Update installed and a restart is pending. Restart, then run: .\bootstrap.ps1 -From 15-updates'
 }
-Write-Ok 'updates installed and no restart is pending'
+
+$remaining = @()
+try { $remaining = @(Get-WindowsUpdate -NotCategory 'Upgrades', 'Feature Packs' -ErrorAction Stop) }
+catch { Write-Warn ("could not re-check pending updates: {0}" -f $_.Exception.Message) }
+if ($remaining.Count -gt 0) {
+    Write-Warn ("{0} update(s) still pending. Restart and re-run, or read the error code in Settings." -f $remaining.Count)
+}
+else {
+    Write-Ok 'updates installed and no update is pending'
+}

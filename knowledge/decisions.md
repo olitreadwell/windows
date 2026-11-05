@@ -145,3 +145,10 @@ Decision: step `12-settings` changes only long paths, Developer Mode and two
 Explorer display values. Each is read before it is written, so a second run
 changes nothing. `gsudo` gets a 30 minute elevation cache for the current
 user. UAC stays on and no account is enabled or elevated.
+
+Later additions stay reversible: clipboard history, Explorer opening This
+PC, tips off, Defender PUA protection and a `RemoteSigned` execution policy
+for the current user. `RemoteSigned` is a deliberate step down from
+`Restricted`: local scripts run, downloaded scripts still need a signature.
+The bootstrap does not change the machine-wide policy, and it does not
+disable UAC.

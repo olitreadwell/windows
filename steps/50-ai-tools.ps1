@@ -14,11 +14,13 @@ if (Test-Path $codexConfig) {
     $usesOllamaCloud = [bool](Select-String -LiteralPath $codexConfig -Pattern 'model_provider\s*=\s*"ollama-cloud"' -Quiet)
 }
 
-if (Test-CommandExists 'codex') {
+if (Test-CommandWorks -Name 'codex') {
     Write-Ok ("codex present: {0}" -f ((& codex --version) -join ' '))
     $completion = & codex completion powershell
     if ($LASTEXITCODE -eq 0 -and $completion) {
         $completionPath = Join-Path $HOME '.codex/completions.ps1'
+        $completionDir = Split-Path -Parent $completionPath
+        if (-not (Test-Path $completionDir)) { New-Item -ItemType Directory -Path $completionDir -Force | Out-Null }
         $completion | Set-Content -Path $completionPath -Encoding UTF8
         Write-Ok ("codex tab completion: {0}" -f $completionPath)
     }
@@ -56,7 +58,7 @@ else {
     Write-Warn 'codex is not on PATH yet. Open a new terminal and check: codex --version'
 }
 
-if (Test-CommandExists 'claude') {
+if (Test-CommandWorks -Name 'claude') {
     Write-Ok ("claude present: {0}" -f ((& claude --version) -join ' '))
     & claude auth status 2>$null | Out-Null
     if ($LASTEXITCODE -eq 0) {

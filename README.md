@@ -116,7 +116,8 @@ edit Terminal's JSON settings.
 1. Records the machine and creates a battery report and restore point.
 2. Applies safe Windows settings: long paths, Developer Mode, file
    extensions, full path in the Explorer title, Explorer opening This PC,
-   clipboard history and tips off.
+   clipboard history, tips off, RemoteSigned execution policy for the
+   current user and Defender PUA protection.
 3. Installs pending security and quality updates without feature upgrades or an automatic reboot.
 4. Ensures `winget`, then installs the core CLI tools: `bat`, `eza`, `delta`,
    `fzf`, `zoxide`, `ripgrep`, `fd`, `jq`, `ffmpeg`, the cloud and Kubernetes

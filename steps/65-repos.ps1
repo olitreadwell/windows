@@ -34,8 +34,9 @@ foreach ($raw in Get-Content -LiteralPath $manifest) {
     }
 
     if (Test-Path $destination) {
-        Write-Warn "not a git repo, skipping: $destination"
-        continue
+        $backup = "$destination.bak.$(Get-Date -Format 'yyyyMMddHHmmss')"
+        Move-Item -LiteralPath $destination -Destination $backup
+        Write-Warn "moved non-git directory aside: $destination -> $backup"
     }
 
     if (-not $useGh -and $global:OliAssumeYes) {

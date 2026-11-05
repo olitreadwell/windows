@@ -6,6 +6,10 @@ if ($packages.Count -eq 0) {
     Write-Fail 'config/packages.txt has no [core] entries'
 }
 
+if (-not (Test-WingetAvailable)) {
+    Write-Fail 'winget is not usable. Run: .\bootstrap.ps1 -Only 20-winget'
+}
+
 $failed = @()
 foreach ($id in $packages) {
     if (-not (Install-WingetPackage -Id $id)) { $failed += $id }
@@ -13,8 +17,7 @@ foreach ($id in $packages) {
 
 Update-SessionPath
 if ($failed.Count -gt 0) {
-    Write-Warn ("core packages failed: {0}" -f ($failed -join ', '))
-    Write-Warn 'Re-run this step after fixing the failures.'
+    Write-Fail ("core packages failed: {0} | fix, then resume: .\bootstrap.ps1 -From 25-core-tools" -f ($failed -join ', '))
 }
 else {
     Write-Ok 'core CLI tools installed'

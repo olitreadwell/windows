@@ -13,7 +13,7 @@ function Initialize-Log {
     $base = $env:LOCALAPPDATA
     if (-not $base) { $base = Join-Path $HOME '.local/state' }
     $global:OliStateDir = Join-Path $base 'oli-windows'
-    $global:OliRunId = Get-Date -Format 'yyyyMMdd-HHmmss'
+    $global:OliRunId = '{0}-{1}' -f (Get-Date -Format 'yyyyMMdd-HHmmss-fff'), $PID
     $global:OliRunSteps = @()
 
     $logsDir = Join-Path $global:OliStateDir 'logs'
@@ -28,7 +28,7 @@ function Initialize-Log {
 
     # Keep the last 30 run logs. Only files this function creates are touched.
     $old = Get-ChildItem -Path $logsDir -Filter '*.log' -File -ErrorAction SilentlyContinue |
-        Sort-Object LastWriteTime -Descending | Select-Object -Skip 30
+        Sort-Object LastWriteTime -Descending | Select-Object -Skip 29
     foreach ($file in $old) { Remove-Item -LiteralPath $file.FullName -Force -ErrorAction SilentlyContinue }
 }
 

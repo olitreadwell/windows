@@ -78,6 +78,8 @@ foreach ($tool in @('codex', 'claude')) {
 
 if (Test-Tool 'codex') {
     $completionPath = Join-Path $HOME '.codex/completions.ps1'
+    $completionDir = Split-Path -Parent $completionPath
+    if (-not (Test-Path $completionDir)) { New-Item -ItemType Directory -Path $completionDir -Force | Out-Null }
     $completion = & codex completion powershell
     if ($LASTEXITCODE -eq 0 -and $completion) {
         $completion | Set-Content -Path $completionPath -Encoding UTF8

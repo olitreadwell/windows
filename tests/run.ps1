@@ -54,6 +54,10 @@ foreach ($relative in $required) {
 . (Join-Path $repoRoot 'core/Detect.ps1')
 . (Join-Path $repoRoot 'core/Plan.ps1')
 . (Join-Path $repoRoot 'core/Winget.ps1')
+
+$testStateRoot = Join-Path ([IO.Path]::GetTempPath()) ("oli-windows-state-" + [guid]::NewGuid().ToString())
+New-Item -ItemType Directory -Path $testStateRoot -Force | Out-Null
+$env:LOCALAPPDATA = $testStateRoot
 Initialize-Log -RepoRoot $repoRoot
 
 if ($env:OS -eq 'Windows_NT') {
@@ -137,12 +141,32 @@ foreach ($needle in @('errors.log', 'Save-RunSummary', 'OliRunId')) {
 }
 
 $settingsText = Get-Content -Path (Join-Path $repoRoot 'steps/12-settings.ps1') -Raw
-foreach ($needle in @('LongPathsEnabled', 'AllowDevelopmentWithoutDevLicense', 'EnableClipboardHistory', 'LaunchTo')) {
+foreach ($needle in @('LongPathsEnabled', 'AllowDevelopmentWithoutDevLicense', 'EnableClipboardHistory', 'LaunchTo', 'RemoteSigned', 'PUAProtection')) {
     if ($settingsText -notmatch [regex]::Escape($needle)) { Add-Failure ("settings step missing: {0}" -f $needle) }
 }
 
 $missingValue = Get-RegistryValue -Path 'HKCU:\Software\oli-windows-missing-test-key' -Name Missing
 if ($null -ne $missingValue) { Add-Failure 'Get-RegistryValue did not return null for a missing key' }
+
+if (-not (Get-Command Test-CommandWorks -ErrorAction SilentlyContinue)) { Add-Failure 'Test-CommandWorks is missing' }
+else {
+    if (Test-CommandWorks -Name 'definitely-not-a-real-command-xyz') { Add-Failure 'Test-CommandWorks accepted a missing command' }
+}
+
+$profilePath = Join-Path $repoRoot 'config/profile/Microsoft.PowerShell_profile.ps1'
+$hostPath = (Get-Process -Id $PID).Path
+& $hostPath -NoProfile -Command ". '$profilePath'" 2>&1 | Out-Null
+if ($LASTEXITCODE -ne 0) { Add-Failure 'profile failed to load in a child process' }
+
+Write-Log 'ledger test line'
+Save-RunSummary -Status 'test' -Started (Get-Date) -Steps @()
+if (-not (Get-ChildItem -Path (Join-Path $env:LOCALAPPDATA 'oli-windows/runs') -Filter '*.json' -ErrorAction SilentlyContinue)) {
+    Add-Failure 'Save-RunSummary wrote no run file'
+}
+try { Write-Fail 'expected test failure' } catch { }
+if (-not (Test-Path (Join-Path $env:LOCALAPPDATA 'oli-windows/errors.log'))) {
+    Add-Failure 'Write-Fail wrote no errors.log'
+}
 
 $macPath = Get-ChildItem -Path $repoRoot -Recurse -Filter '*.ps1' -File | Where-Object { $_.FullName -ne $PSCommandPath } | Select-String -Pattern '/Users/olitreadwell' -SimpleMatch -ErrorAction SilentlyContinue
 if ($macPath) { Add-Failure 'hardcoded macOS home path in a PowerShell file' }
@@ -169,6 +193,7 @@ try {
 }
 finally {
     Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $testStateRoot -Recurse -Force -ErrorAction SilentlyContinue
 }
 
 if ($script:failures -gt 0) {

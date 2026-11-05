@@ -104,7 +104,8 @@ foreach ($step in $plan) {
             seconds = [math]::Round(((Get-Date) - $stepStart).TotalSeconds, 1)
             error   = $failure
         }
-        Save-RunSummary -Status 'failed' -Started $started -Steps $stepResults
+        try { Save-RunSummary -Status 'failed' -Started $started -Steps $stepResults }
+        catch { Write-Warn ("run summary failed: {0}" -f $_.Exception.Message) }
         Write-Fail ("step {0} failed: {1} | resume: .\bootstrap.ps1 -From {0}" -f $step, $failure)
     }
     $stepResults += [pscustomobject]@{
@@ -115,7 +116,8 @@ foreach ($step in $plan) {
     Write-Log ("step {0} took {1:n1}s" -f $step, ((Get-Date) - $stepStart).TotalSeconds)
 }
 
-Save-RunSummary -Status 'ok' -Started $started -Steps $stepResults
+try { Save-RunSummary -Status 'ok' -Started $started -Steps $stepResults }
+catch { Write-Warn ("run summary failed: {0}" -f $_.Exception.Message) }
 $elapsed = (Get-Date) - $started
 Write-Host ''
 Write-Ok ("bootstrap finished in {0:n1} minutes" -f $elapsed.TotalMinutes)

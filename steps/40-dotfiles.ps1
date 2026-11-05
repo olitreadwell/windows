@@ -91,6 +91,7 @@ if (-not (Test-Path $catalog)) {
 
 $profileSource = Join-Path $global:OliRepoRoot 'config/profile/Microsoft.PowerShell_profile.ps1'
 $documents = [Environment]::GetFolderPath('MyDocuments')
+if (-not $documents) { $documents = Join-Path $HOME 'Documents' }
 $profilePaths = @(
     (Join-Path $documents 'WindowsPowerShell/Microsoft.PowerShell_profile.ps1'),
     (Join-Path $documents 'PowerShell/Microsoft.PowerShell_profile.ps1')
@@ -109,7 +110,11 @@ else {
 }
 
 & git config --global user.name 'olitreadwell'
+if ($LASTEXITCODE -ne 0) { Write-Warn 'git config user.name failed' }
 & git config --global user.email 'oliver.treadwell@gmail.com'
+if ($LASTEXITCODE -ne 0) { Write-Warn 'git config user.email failed' }
 & git config --global credential.helper manager
+if ($LASTEXITCODE -ne 0) { Write-Warn 'git config credential.helper failed' }
 & git config --global core.longpaths true
+if ($LASTEXITCODE -ne 0) { Write-Warn 'git config core.longpaths failed' }
 Write-Ok 'git identity and credential helper set'

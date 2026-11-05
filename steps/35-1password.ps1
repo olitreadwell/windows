@@ -31,16 +31,14 @@ $block = @(
 ) -join "`r`n"
 
 $existing = ''
-if (Test-Path $sshConfig) { $existing = Get-Content -Raw -LiteralPath $sshConfig }
+if (Test-Path $sshConfig) { $existing = [string](Get-Content -Raw -LiteralPath $sshConfig) }
+if (-not $existing) { $existing = '' }
 
 $pattern = '(?s)' + [regex]::Escape($begin) + '.*?' + [regex]::Escape($end) + '\r?\n?'
-if ($existing -match [regex]::Escape($begin)) {
-    $updated = [regex]::Replace($existing, $pattern, ($block + "`r`n"))
-}
-else {
-    if ($existing.Length -gt 0 -and -not $existing.EndsWith("`n")) { $existing += "`r`n" }
-    $updated = $existing + $block + "`r`n"
-}
+# SSH uses the first value it finds, so the block goes at the top. Any
+# earlier copy is removed first, which also makes a second run a no-op.
+$stripped = [regex]::Replace($existing, $pattern, '')
+$updated = $block + "`r`n" + $stripped
 
 if ($updated -eq $existing) {
     Write-Ok 'ssh config: 1Password agent block already current'
