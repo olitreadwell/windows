@@ -93,6 +93,8 @@ repo; the bootstrap still installs git and clones `dotfiles` and
 - `.\bootstrap.ps1 -Parallel` runs `45-runtimes`, `47-pwsh-modules` and
   `65-repos` in separate windows while `60-apps` installs. Winget steps stay
   serial because winget takes a global installer lock.
+- `.\bootstrap.ps1 -OptionalApps` adds the large or situational apps
+  (LibreOffice, GIMP, darktable, Mixxx, qBittorrent, Beeper, Jan, Dataflare).
 - `.\bootstrap.ps1 -Yes` skips interactive auth prompts with warnings.
 - `.\bootstrap.ps1 -NoAdmin` skips the elevation guard. Admin-only steps will fail.
 - `.\scripts\Update-All.ps1` updates winget packages, mise runtimes and `gh` extensions.

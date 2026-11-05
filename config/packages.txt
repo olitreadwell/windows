@@ -72,20 +72,24 @@ AntibodySoftware.WizTree
 CrystalDewWorld.CrystalDiskInfo
 yang991178.fluent-reader
 QL-Win.QuickLook
-Mixxx.Mixxx
 Wox.Wox
 Zen-Team.Zen-Browser
-Dataflare.Dataflare
-Beeper.Beeper
 Bitwarden.Bitwarden
 FilesCommunity.Files
-TheDocumentFoundation.LibreOffice
 M2Team.NanaZip
 Nilesoft.Shell
 File-New-Project.EarTrumpet
-GIMP.GIMP
-qBittorrent.qBittorrent
 Alacritty.Alacritty
-darktable.darktable
 ZedIndustries.Zed
+
+# [apps-optional] are the big or situational downloads. Install them with
+# -OptionalApps, or add one to [apps] if a fresh machine should always have it.
+[apps-optional]
+TheDocumentFoundation.LibreOffice
+GIMP.GIMP
+darktable.darktable
+Mixxx.Mixxx
+qBittorrent.qBittorrent
+Beeper.Beeper
 Jan.Jan
+Dataflare.Dataflare

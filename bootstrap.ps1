@@ -28,6 +28,7 @@ param(
     [string]$From,
     [string]$Only,
     [switch]$Parallel,
+    [switch]$OptionalApps,
     [switch]$SkipUpdates,
     [switch]$DryRun,
     [switch]$Yes,
@@ -48,6 +49,7 @@ $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 Initialize-Log -RepoRoot $repoRoot
 $global:OliAssumeYes = [bool]$Yes
 $global:OliDryRun = [bool]$DryRun
+$global:OliOptionalApps = [bool]$OptionalApps
 Write-Log ("run: {0}" -f $global:OliRunId)
 
 # Old Windows 10 builds default to TLS 1.0, which GitHub rejects.

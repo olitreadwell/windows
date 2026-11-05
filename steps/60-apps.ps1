@@ -2,6 +2,11 @@
 Set-StrictMode -Version 2.0
 
 $packages = Get-PackageSection -Path (Join-Path $global:OliRepoRoot 'config/packages.txt') -Section 'apps'
+$optionalFlag = Get-Variable -Name OliOptionalApps -Scope Global -ErrorAction SilentlyContinue
+if ($optionalFlag -and $optionalFlag.Value) {
+    $packages += Get-PackageSection -Path (Join-Path $global:OliRepoRoot 'config/packages.txt') -Section 'apps-optional'
+    Write-Log 'including the optional app section'
+}
 if ($packages.Count -eq 0) {
     Write-Log 'no [apps] entries'
     return
