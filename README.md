@@ -87,6 +87,7 @@ repo; the bootstrap still installs git and clones `dotfiles` and
 - `.\bootstrap.ps1 -DryRun` prints the plan and exits.
 - `.\bootstrap.ps1 -From 40-dotfiles` resumes from a step.
 - `.\bootstrap.ps1 -Only 90-verify` runs one step.
+- `.\bootstrap.ps1 -Only 26-scoop` prints the Scoop command (run it from a normal window).
 - `.\bootstrap.ps1 -SkipUpdates` runs every step except Windows Update.
 - `.\bootstrap.ps1 -Yes` skips interactive auth prompts with warnings.
 - `.\bootstrap.ps1 -NoAdmin` skips the elevation guard. Admin-only steps will fail.
@@ -100,6 +101,15 @@ One manual setting: Windows Terminal > Profiles > Defaults > Appearance >
 Font face > `JetBrainsMono Nerd Font`. Without it, `eza` icons and the
 Starship prompt show as boxes. The bootstrap installs the font but does not
 edit Terminal's JSON settings.
+
+Scoop is the one install the bootstrap cannot finish, because it refuses to
+run elevated. In a normal PowerShell window:
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass -Force
+irm get.scoop.sh | iex
+scoop bucket add extras
+```
 
 ## Layout
 

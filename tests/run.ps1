@@ -92,9 +92,9 @@ $plan = @(Get-StepPlan -RepoRoot $repoRoot)
 if ($plan.Count -eq 0) { Add-Failure 'empty step plan' }
 $expectedSteps = @(
     '10-preflight', '12-settings', '15-updates', '20-winget',
-    '25-core-tools', '30-auth', '35-1password', '40-dotfiles',
-    '45-runtimes', '47-pwsh-modules', '50-ai-tools', '60-apps',
-    '65-repos', '90-verify'
+    '25-core-tools', '26-scoop', '30-auth', '35-1password',
+    '40-dotfiles', '45-runtimes', '47-pwsh-modules', '50-ai-tools',
+    '60-apps', '65-repos', '90-verify'
 )
 if (($plan -join ',') -ne ($expectedSteps -join ',')) {
     Add-Failure ("step plan mismatch: {0}" -f ($plan -join ', '))
@@ -121,6 +121,9 @@ foreach ($id in @('OpenAI.Codex', 'Anthropic.ClaudeCode', 'Ollama.Ollama')) {
 $apps = @(Get-PackageSection -Path (Join-Path $repoRoot 'config/packages.txt') -Section 'apps')
 if ($apps.Count -eq 0) { Add-Failure 'no [apps] packages' }
 foreach ($id in @('voidtools.Everything', 'ShareX.ShareX', 'Microsoft.PowerToys')) {
+    if ($apps -notcontains $id) { Add-Failure ("apps missing: {0}" -f $id) }
+}
+foreach ($id in @('Zen-Team.Zen-Browser', 'ZedIndustries.Zed', 'TheDocumentFoundation.LibreOffice', 'Nilesoft.Shell')) {
     if ($apps -notcontains $id) { Add-Failure ("apps missing: {0}" -f $id) }
 }
 

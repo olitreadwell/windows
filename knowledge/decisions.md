@@ -152,3 +152,18 @@ for the current user. `RemoteSigned` is a deliberate step down from
 `Restricted`: local scripts run, downloaded scripts still need a signature.
 The bootstrap does not change the machine-wide policy, and it does not
 disable UAC.
+
+## ADR 12: Scoop is a printed instruction, not a silent script
+
+Status: accepted, 2026-11-05.
+
+Scoop is useful for unix-style CLI packages that winget lacks. Its installer
+refuses to run as administrator, and the bootstrap always runs elevated.
+Installing it globally with `-RunAsAdmin` would make every later `scoop
+install` need admin, which is worse than one manual step.
+
+Decision: step `26-scoop` checks for an existing install and otherwise
+prints the exact three commands for a normal PowerShell window. The repo
+does not pipe a remote script into `iex` from an elevated process. When run
+from a normal window with `-Only 26-scoop`, the step downloads the installer
+to a file, logs its SHA256 and runs it.

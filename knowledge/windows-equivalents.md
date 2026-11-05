@@ -128,14 +128,34 @@ These are Windows-first tools that have no macOS counterpart in the
 | VLC | `VideoLAN.VLC` | Plays every codec |
 | Fluent Reader | `yang991178.fluent-reader` | RSS reader, the NetNewsWire stand-in |
 | QuickLook | `QL-Win.QuickLook` | Spacebar file preview, like Finder |
+| Zen Browser | `Zen-Team.Zen-Browser` | Firefox-based browser with vertical tabs |
+| Zed | `ZedIndustries.Zed` | Fast GPU editor with Windows builds |
+| Files | `FilesCommunity.Files` | Tabbed Explorer replacement |
+| Nilesoft Shell | `Nilesoft.Shell` | Right-click menu with the classic layout |
+| NanaZip | `M2Team.NanaZip` | 7-Zip fork with a modern menu |
+| EarTrumpet | `File-New-Project.EarTrumpet` | Per-app volume control |
+| LibreOffice | `TheDocumentFoundation.LibreOffice` | Office suite |
+| GIMP | `GIMP.GIMP` | Image editor |
+| darktable | `darktable.darktable` | RAW photo workflow |
+| qBittorrent | `qBittorrent.qBittorrent` | Torrent client |
+| Alacritty | `Alacritty.Alacritty` | GPU terminal, alternative to Windows Terminal |
+| Mixxx | `Mixxx.Mixxx` | DJ software |
+| Wox | `Wox.Wox` | Keyboard launcher |
+| Dataflare | `Dataflare.Dataflare` | Database client |
+| Beeper | `Beeper.Beeper` | One inbox for chat networks |
+| Jan | `Jan.Jan` | Local model desktop client |
+| Bitwarden | `Bitwarden.Bitwarden` | Password manager |
+| KeePassXC | `KeePassXCTeam.KeePassXC` | Offline password manager, optional |
 
 Considered and not installed: WSL2 (`Microsoft.WSL`, deferred), GlazeWM
 (`glzr-io.glazewm`, conflicts with FancyZones), Flow Launcher
-(`Flow-Launcher.Flow-Launcher`, PowerToys Run covers it), Files
-(`FilesCommunity.Files`, Explorer plus Everything covers it), Syncthing
-(sync deletions need a deliberate setup), Deskflow and LocalSend (LAN
-sharing needs a firewall decision).
+(`Flow-Launcher.Flow-Launcher`, PowerToys Run covers it), Syncthing (sync
+deletions need a deliberate setup), Deskflow and LocalSend (LAN sharing
+needs a firewall decision).
+
+No winget package found: Equicord (a Discord client mod, install from its
+own site), Orca (the macOS agent IDE), Paseo, and Scoop (install script, see
+the README).
 
 Optional, not installed: DBeaver (`DBeaver.DBeaver`) for database GUIs,
-Docker Desktop (needs WSL2), minikube, PostgreSQL 16, and VLC was kept
-because iina has no Windows build.
+Docker Desktop (needs WSL2), minikube and PostgreSQL 16.
