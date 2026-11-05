@@ -88,9 +88,24 @@ Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'scripts/Diagnose-Windows
 Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'scripts/Show-InstalledApps.ps1') -Destination (Join-Path $binDir 'installed-apps.ps1') -CopyOnly | Out-Null
 Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'scripts/Send-Logs.ps1') -Destination (Join-Path $binDir 'send-logs.ps1') -CopyOnly | Out-Null
 
+# Git for Windows checks out symlinks as small text files unless Developer
+# Mode is on, which turns every hook into a stub that git cannot execute.
+# Copy the hook contents instead, resolving one level of "chain-hook" stub.
 $hooksSource = Join-Path $dotfiles 'git_hooks'
+$hooksDest = Join-Path $HOME '.config/git/hooks'
 if (Test-Path $hooksSource) {
-    Set-ManagedDirectory -Source $hooksSource -Destination (Join-Path $HOME '.config/git/hooks') | Out-Null
+    if (Test-Path $hooksDest) { Remove-ManagedPath -Path $hooksDest }
+    New-Item -ItemType Directory -Path $hooksDest -Force | Out-Null
+    foreach ($hook in Get-ChildItem -Path $hooksSource -File) {
+        $source = $hook.FullName
+        $content = Get-Content -LiteralPath $hook.FullName -Raw -ErrorAction SilentlyContinue
+        if ($content -and $content.Trim() -match '^[A-Za-z0-9._-]+$') {
+            $target = Join-Path $hooksSource $content.Trim()
+            if (Test-Path -LiteralPath $target) { $source = $target }
+        }
+        Copy-Item -LiteralPath $source -Destination (Join-Path $hooksDest $hook.Name) -Force
+    }
+    Write-Ok ("git hooks copied: {0}" -f $hooksDest)
 }
 
 $codexDir = Join-Path $HOME '.codex'

@@ -39,6 +39,7 @@ param(
     [switch]$RepairWindows,
     [switch]$FixUpdate,
     [switch]$NoReboot,
+    [switch]$NoLogUpload,
     [switch]$Windows10,
     [switch]$Windows11,
     [switch]$ScheduleUpdate,
@@ -68,6 +69,7 @@ $global:OliInstallWsl = [bool]$Wsl
 $global:OliRepairWindows = [bool]$RepairWindows
 $global:OliFixUpdate = [bool]$FixUpdate
 $global:OliNoReboot = [bool]$NoReboot
+$global:OliNoLogUpload = [bool]$NoLogUpload
 $global:OliWindows10 = [bool]$Windows10
 $global:OliWindows11 = [bool]$Windows11
 $global:OliScheduleUpdate = [bool]$ScheduleUpdate
@@ -141,6 +143,15 @@ function Invoke-Step {
         }
         try { Save-RunSummary -Status 'failed' -Started $started -Steps $script:stepResults }
         catch { Write-Warn ("run summary failed: {0}" -f $_.Exception.Message) }
+        if (-not $global:OliNoLogUpload) {
+            # One failure report per run, so the next iteration reads the log
+            # instead of a typed error message from another machine.
+            try {
+                $sendLogs = Join-Path $repoRoot 'scripts/Send-Logs.ps1'
+                if (Test-Path $sendLogs) { & $sendLogs -Latest 2 }
+            }
+            catch { Write-Warn ("log upload failed: {0}" -f $_.Exception.Message) }
+        }
         Write-Fail ("step {0} failed: {1} | resume: .\bootstrap.ps1 -From {0}" -f $Step, $failure)
     }
     $script:stepResults += [pscustomobject]@{
