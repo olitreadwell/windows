@@ -22,6 +22,7 @@ eza-community.eza
 dandavison.delta
 DEVCOM.JetBrainsMonoNerdFont
 gerardog.gsudo
+Microsoft.EdgeWebView2Runtime
 jqlang.jq
 Gyan.FFmpeg
 GnuPG.GnuPG
