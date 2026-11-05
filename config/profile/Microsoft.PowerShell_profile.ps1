@@ -41,7 +41,12 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
     function lt { eza --icons --tree --level=2 @args }
 }
 else {
-    Set-Alias -Name ls -Value Get-ChildItem -Force
+    # The built-in ls alias is AllScope, so -Force cannot rewrite it.
+    try {
+        Remove-Item -Path Alias:ls -Force -ErrorAction SilentlyContinue
+        Set-Alias -Name ls -Value Get-ChildItem
+    }
+    catch { }
     function ll { Get-ChildItem -Force @args }
     function la { Get-ChildItem -Force @args }
 }
