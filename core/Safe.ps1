@@ -12,6 +12,27 @@ function Test-CommandExists {
     return [bool](Get-Command $Name -ErrorAction SilentlyContinue)
 }
 
+function Get-RegistryValue {
+    <#
+    Reads one registry value and returns $null when the key or value is
+    missing. Accessing a missing property directly throws under
+    Set-StrictMode -Version 2.0, which is what broke step 12 on a fresh
+    Windows install.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$Name
+    )
+
+    try {
+        $item = Get-ItemProperty -Path $Path -Name $Name -ErrorAction Stop
+        return $item.$Name
+    }
+    catch {
+        return $null
+    }
+}
+
 function Get-StateDir {
     if (-not (Test-Path $global:OliStateDir)) {
         New-Item -ItemType Directory -Path $global:OliStateDir -Force | Out-Null

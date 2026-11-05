@@ -141,6 +141,9 @@ foreach ($needle in @('LongPathsEnabled', 'AllowDevelopmentWithoutDevLicense', '
     if ($settingsText -notmatch [regex]::Escape($needle)) { Add-Failure ("settings step missing: {0}" -f $needle) }
 }
 
+$missingValue = Get-RegistryValue -Path 'HKCU:\Software\oli-windows-missing-test-key' -Name Missing
+if ($null -ne $missingValue) { Add-Failure 'Get-RegistryValue did not return null for a missing key' }
+
 $macPath = Get-ChildItem -Path $repoRoot -Recurse -Filter '*.ps1' -File | Where-Object { $_.FullName -ne $PSCommandPath } | Select-String -Pattern '/Users/olitreadwell' -SimpleMatch -ErrorAction SilentlyContinue
 if ($macPath) { Add-Failure 'hardcoded macOS home path in a PowerShell file' }
 
