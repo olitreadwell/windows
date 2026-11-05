@@ -30,12 +30,21 @@ if (-not (Test-Path $updateScript)) {
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument ('-NoProfile -ExecutionPolicy Bypass -File "{0}"' -f $updateScript)
 $trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Sunday -At '10:00'
 $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -DontStopOnIdleEnd
-$principal = New-ScheduledTaskPrincipal -UserId ("{0}\{1}" -f $env:USERDOMAIN, $env:USERNAME) -LogonType Interactive -RunLevel Highest
+
+# Resolve the account by SID. A name like "DOMAIN\First Last" fails to map in
+# Register-ScheduledTask on some Windows 10 builds with error 0x80070534.
+$sid = ([System.Security.Principal.WindowsIdentity]::GetCurrent()).User.Value
+$principal = New-ScheduledTaskPrincipal -UserId $sid -LogonType Interactive -RunLevel Highest
 
 try {
-    Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Description 'Weekly winget, mise and gh extension update' -Force | Out-Null
-    Write-Ok 'weekly update task registered for Sunday 10:00'
+    Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Description 'Weekly winget, mise and gh extension update' -Force -ErrorAction Stop | Out-Null
 }
 catch {
-    Write-Warn ("scheduled task failed: {0}" -f $_.Exception.Message)
+    Write-Fail ("scheduled task failed: {0}" -f $_.Exception.Message)
 }
+
+$registered = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+if (-not $registered) {
+    Write-Fail 'scheduled task did not register'
+}
+Write-Ok ("weekly update task registered for Sunday 10:00 ({0})" -f $registered.State)
