@@ -227,3 +227,17 @@ Manual fallback, documented in the step output: the ISO from
 `https://www.microsoft.com/software-download/windows11`, mounted and run as
 `setup.exe`. The Media Creation Tool plus an 8 GB USB stick is the clean
 install path.
+
+## ADR 17: Windows 10 22H2 also has a direct upgrade path
+
+Status: accepted, 2026-11-05.
+
+The stuck feature update may be Windows 10 22H2 itself rather than Windows
+11. Reaching 22H2 is still worth doing: it is the last Windows 10 release,
+and the base build that ESU and the Windows 11 upgrade path expect.
+
+Decision: step `16-win10` is opt-in behind `-Windows10`. It skips when the
+build is already 19045, requires 20 GB free, downloads Microsoft's Windows 10
+Update Assistant, verifies the Authenticode signature, and runs it. It never
+reboots by itself. `16-win11` stays separate so the two upgrades are never
+queued in one run.

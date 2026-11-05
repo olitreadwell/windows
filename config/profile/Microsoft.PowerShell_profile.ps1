@@ -132,6 +132,12 @@ function logs {
     else { Write-Warning 'no log directory yet' }
 }
 
+function sendlogs {
+    $script = Join-Path $HOME 'bin\send-logs.ps1'
+    if (Test-Path $script) { & $script @args }
+    else { Write-Warning 'send-logs.ps1 is missing. Re-run: .\bootstrap.ps1 -Only 40-dotfiles' }
+}
+
 function apps {
     param([string]$Filter)
     $script = Join-Path $HOME 'bin\installed-apps.ps1'

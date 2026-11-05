@@ -86,6 +86,7 @@ $binDir = Join-Path $HOME 'bin'
 Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'scripts/Update-All.ps1') -Destination (Join-Path $binDir 'update.ps1') -CopyOnly | Out-Null
 Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'scripts/Diagnose-WindowsUpdate.ps1') -Destination (Join-Path $binDir 'diagnose-update.ps1') -CopyOnly | Out-Null
 Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'scripts/Show-InstalledApps.ps1') -Destination (Join-Path $binDir 'installed-apps.ps1') -CopyOnly | Out-Null
+Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'scripts/Send-Logs.ps1') -Destination (Join-Path $binDir 'send-logs.ps1') -CopyOnly | Out-Null
 
 $hooksSource = Join-Path $dotfiles 'git_hooks'
 if (Test-Path $hooksSource) {

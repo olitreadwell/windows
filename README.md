@@ -98,6 +98,7 @@ repo; the bootstrap still installs git and clones `dotfiles` and
   (LibreOffice, GIMP, darktable, Mixxx, qBittorrent, Beeper, Jan, Dataflare).
 - `.\bootstrap.ps1 -Wsl` enables WSL2 and Ubuntu after a restart.
 - `.\bootstrap.ps1 -RepairWindows` runs DISM, SFC and the update cache reset.
+- `.\bootstrap.ps1 -Windows10` downloads Microsoft's Windows 10 Update Assistant and runs the 22H2 upgrade.
 - `.\bootstrap.ps1 -Windows11` downloads Microsoft's Installation Assistant and runs the Windows 11 upgrade, bypassing Windows Update.
 - `.\bootstrap.ps1 -ScheduleUpdate` registers a weekly Sunday 10:00 update task.
 - `.\bootstrap.ps1 -Yes` skips interactive auth prompts with warnings.
@@ -105,6 +106,7 @@ repo; the bootstrap still installs git and clones `dotfiles` and
 - `.\scripts\Update-All.ps1` updates winget packages, mise runtimes and `gh` extensions.
 - `.\scripts\Diagnose-WindowsUpdate.ps1` reports why an update is stuck, read-only.
 - `.\scripts\Remove-RecordedApps.ps1` lists what this repo installed; add `-Apply` to uninstall.
+- `sendlogs` (or `.\scripts\Send-Logs.ps1`) uploads the recent logs to a secret gist for review.
 - `.\tests\run.ps1` runs the gate on Windows.
 
 After step 40 the same two helpers run as the commands `update` and `wupdate`.
