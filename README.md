@@ -102,6 +102,11 @@ Font face > `JetBrainsMono Nerd Font`. Without it, `eza` icons and the
 Starship prompt show as boxes. The bootstrap installs the font but does not
 edit Terminal's JSON settings.
 
+Windows blocks a scripted default-browser change, so step 60 opens the
+Default Apps page and asks you to pick Zen Browser. Reopen it later with
+`defaultapps`. Keep the machine awake with `caffeinate 120`, or use the
+PowerToys Awake tray menu.
+
 Scoop is the one install the bootstrap cannot finish, because it refuses to
 run elevated. In a normal PowerShell window:
 
@@ -127,7 +132,7 @@ scoop bucket add extras
 2. Applies safe Windows settings: long paths, Developer Mode, file
    extensions, full path in the Explorer title, Explorer opening This PC,
    clipboard history, tips off, RemoteSigned execution policy for the
-   current user and Defender PUA protection.
+   current user, Defender PUA protection and reversed scroll direction.
 3. Installs pending security and quality updates without feature upgrades or an automatic reboot.
 4. Ensures `winget`, then installs the core CLI tools: `bat`, `eza`, `delta`,
    `fzf`, `zoxide`, `ripgrep`, `fd`, `jq`, `ffmpeg`, the cloud and Kubernetes

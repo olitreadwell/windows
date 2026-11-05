@@ -18,3 +18,17 @@ if ($failed.Count -gt 0) {
 else {
     Write-Ok 'apps installed'
 }
+
+# Windows validates the default-browser choice with a hash and ignores a
+# scripted write, so the best a script can do is detect the gap and open the
+# right page. Zen is a Firefox fork and registers itself as a candidate.
+$htmlChoice = Get-RegistryValue -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.html\UserChoice' -Name ProgId
+if ($htmlChoice -and $htmlChoice -match 'Zen') {
+    Write-Ok 'default browser is Zen'
+}
+else {
+    if ($htmlChoice) { Write-Warn ("default browser is {0}; Windows blocks a scripted change" -f $htmlChoice) }
+    else { Write-Warn 'no default browser is recorded; Windows blocks a scripted change' }
+    Write-Warn 'Choose Zen Browser in the page that opens, or run: defaultapps'
+    Start-Process 'ms-settings:defaultapps'
+}

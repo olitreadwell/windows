@@ -136,7 +136,7 @@ $bootstrapText = Get-Content -Path (Join-Path $repoRoot 'bootstrap.ps1') -Raw
 if ($bootstrapText -notmatch 'SkipUpdates') { Add-Failure 'bootstrap.ps1 has no -SkipUpdates switch' }
 
 $profileText = Get-Content -Path (Join-Path $repoRoot 'config/profile/Microsoft.PowerShell_profile.ps1') -Raw
-foreach ($needle in @('eza', 'Get-Command bat', 'delta', 'fcd', 'function update', 'function logs', 'function doctor', '.codex\completions.ps1', 'PSFzf', 'Terminal-Icons', 'Ctrl+t', 'Ctrl+r')) {
+foreach ($needle in @('eza', 'Get-Command bat', 'delta', 'fcd', 'function update', 'function logs', 'function doctor', 'function caffeinate', 'function defaultapps', '.codex\completions.ps1', 'PSFzf', 'Terminal-Icons', 'Ctrl+t', 'Ctrl+r')) {
     if ($profileText -notmatch [regex]::Escape($needle)) { Add-Failure ("profile missing: {0}" -f $needle) }
 }
 
@@ -146,7 +146,7 @@ foreach ($needle in @('errors.log', 'Save-RunSummary', 'OliRunId')) {
 }
 
 $settingsText = Get-Content -Path (Join-Path $repoRoot 'steps/12-settings.ps1') -Raw
-foreach ($needle in @('LongPathsEnabled', 'AllowDevelopmentWithoutDevLicense', 'EnableClipboardHistory', 'LaunchTo', 'RemoteSigned', 'PUAProtection')) {
+foreach ($needle in @('LongPathsEnabled', 'AllowDevelopmentWithoutDevLicense', 'EnableClipboardHistory', 'LaunchTo', 'RemoteSigned', 'PUAProtection', 'FlipFlopWheel')) {
     if ($settingsText -notmatch [regex]::Escape($needle)) { Add-Failure ("settings step missing: {0}" -f $needle) }
 }
 

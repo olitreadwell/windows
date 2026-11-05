@@ -167,3 +167,16 @@ prints the exact three commands for a normal PowerShell window. The repo
 does not pipe a remote script into `iex` from an elevated process. When run
 from a normal window with `-Only 26-scoop`, the step downloads the installer
 to a file, logs its SHA256 and runs it.
+
+## ADR 13: Default browser is a human choice
+
+Status: accepted, 2026-11-05.
+
+Windows 10 validates the default-browser choice with a hash in
+`Explorer\FileExts\.html\UserChoice`. A scripted ProgId without that hash is
+ignored, and third-party tools that forge the hash break on the next
+Windows change. Hiding that behind a script is worse than one manual pick.
+
+Decision: step `60-apps` reads the recorded ProgId, reports the current
+browser, and opens the Default Apps page when it is not Zen. It never writes
+`UserChoice`. The profile offers `defaultapps` to reopen the page.

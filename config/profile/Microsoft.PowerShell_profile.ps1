@@ -135,6 +135,27 @@ function doctor {
     update -DryRun
 }
 
+function defaultapps {
+    Start-Process 'ms-settings:defaultapps'
+}
+
+function caffeinate {
+    param([int]$Minutes = 60)
+    if (-not ('Win32.Power' -as [type])) {
+        Add-Type -Namespace Win32 -Name Power -MemberDefinition @'
+[System.Runtime.InteropServices.DllImport("kernel32.dll")]
+public static extern uint SetThreadExecutionState(uint esFlags);
+'@
+    }
+    $continuous = [uint32]2147483648
+    $system = [uint32]1
+    $display = [uint32]2
+    [Win32.Power]::SetThreadExecutionState([uint32]($continuous -bor $system -bor $display)) | Out-Null
+    Write-Host ("Awake for {0} minutes. Press Ctrl+C to stop." -f $Minutes)
+    try { Start-Sleep -Seconds ($Minutes * 60) }
+    finally { [Win32.Power]::SetThreadExecutionState($continuous) | Out-Null }
+}
+
 function gs { git status -s @args }
 function gl { git pull --rebase @args }
 function gp { git push @args }

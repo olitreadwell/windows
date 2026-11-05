@@ -125,6 +125,26 @@ catch {
     Write-Warn ("Defender preference not changed: {0}" -f $_.Exception.Message)
 }
 
+# Reverse the scroll direction, the same way macOS feels. Windows 10 has no
+# Settings toggle for this, so it goes on each HID mouse device. Unplug and
+# replug the mouse, or restart, if the change does not apply immediately.
+$mouseDevices = @(Get-PnpDevice -Class Mouse -Status OK -ErrorAction SilentlyContinue)
+$reversed = 0
+foreach ($device in $mouseDevices) {
+    $devicePath = "HKLM:\SYSTEM\CurrentControlSet\Enum\$($device.InstanceId)\Device Parameters"
+    if (-not (Test-Path $devicePath)) { continue }
+    if ((Get-RegistryValue -Path $devicePath -Name FlipFlopWheel) -ne 1) {
+        Set-ItemProperty -Path $devicePath -Name FlipFlopWheel -Value 1 -Type DWord -ErrorAction SilentlyContinue
+        if ((Get-RegistryValue -Path $devicePath -Name FlipFlopWheel) -eq 1) { $reversed++ }
+    }
+}
+if ($reversed -gt 0) {
+    Write-Ok ("reversed scroll direction on {0} pointing device(s); replug or restart" -f $reversed)
+}
+else {
+    Write-Ok 'scroll direction already reversed, or no HID device accepted the value'
+}
+
 # Restart Explorer so the Explorer changes appear without a sign-out.
 $explorer = Get-Process -Name explorer -ErrorAction SilentlyContinue
 if ($explorerChanged -and $explorer) {
