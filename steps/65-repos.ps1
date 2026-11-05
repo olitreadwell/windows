@@ -1,5 +1,6 @@
 # Clone personal repos into ~/code. Manifest: repos.txt.
 Set-StrictMode -Version 2.0
+$ErrorActionPreference = 'Continue'
 
 $manifest = Join-Path $global:OliRepoRoot 'repos.txt'
 if (-not (Test-Path $manifest)) {

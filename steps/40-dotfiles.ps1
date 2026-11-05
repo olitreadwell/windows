@@ -2,6 +2,7 @@
 Set-StrictMode -Version 2.0
 $env:GIT_TERMINAL_PROMPT = '0'
 $env:GCM_INTERACTIVE = 'Never'
+$ErrorActionPreference = 'Continue'
 
 function Update-GitRepo {
     param(

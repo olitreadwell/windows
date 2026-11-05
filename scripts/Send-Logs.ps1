@@ -21,7 +21,7 @@ param(
 )
 
 Set-StrictMode -Version 2.0
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Continue'
 
 $stateDir = Join-Path $env:LOCALAPPDATA 'oli-windows'
 if (-not $env:LOCALAPPDATA) { $stateDir = Join-Path $HOME '.local/state/oli-windows' }

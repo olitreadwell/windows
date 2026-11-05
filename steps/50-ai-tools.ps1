@@ -1,5 +1,6 @@
 # Codex CLI, Claude Code, and their first-run auth.
 Set-StrictMode -Version 2.0
+$ErrorActionPreference = 'Continue'
 
 $packages = Get-PackageSection -Path (Join-Path $global:OliRepoRoot 'config/packages.txt') -Section 'ai'
 foreach ($id in $packages) {
