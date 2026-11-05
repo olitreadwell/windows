@@ -98,6 +98,7 @@ repo; the bootstrap still installs git and clones `dotfiles` and
   (LibreOffice, GIMP, darktable, Mixxx, qBittorrent, Beeper, Jan, Dataflare).
 - `.\bootstrap.ps1 -Wsl` enables WSL2 and Ubuntu after a restart.
 - `.\bootstrap.ps1 -RepairWindows` runs DISM, SFC and the update cache reset.
+- `.\bootstrap.ps1 -Windows11` downloads Microsoft's Installation Assistant and runs the Windows 11 upgrade, bypassing Windows Update.
 - `.\bootstrap.ps1 -ScheduleUpdate` registers a weekly Sunday 10:00 update task.
 - `.\bootstrap.ps1 -Yes` skips interactive auth prompts with warnings.
 - `.\bootstrap.ps1 -NoAdmin` skips the elevation guard. Admin-only steps will fail.

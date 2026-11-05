@@ -47,7 +47,7 @@ catch {
 
 if ($upgrades.Count -gt 0) {
     Write-Warn ("{0} feature upgrade(s) are offered. This script will not install them." -f $upgrades.Count)
-    Write-Warn 'Upgrade to Windows 11 deliberately with the Installation Assistant after these updates.'
+    Write-Warn 'Upgrade to Windows 11 deliberately with: .\bootstrap.ps1 -Windows11'
 }
 
 $pending = @()

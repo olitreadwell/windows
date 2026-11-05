@@ -22,6 +22,9 @@ powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -SkipUpdates
 
 .EXAMPLE
 powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -Parallel -SkipUpdates
+
+.EXAMPLE
+powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -Windows11
 #>
 [CmdletBinding()]
 param(
@@ -31,6 +34,7 @@ param(
     [switch]$OptionalApps,
     [switch]$Wsl,
     [switch]$RepairWindows,
+    [switch]$Windows11,
     [switch]$ScheduleUpdate,
     [switch]$ChildRun,
     [switch]$SkipUpdates,
@@ -56,6 +60,7 @@ $global:OliDryRun = [bool]$DryRun
 $global:OliOptionalApps = [bool]$OptionalApps
 $global:OliInstallWsl = [bool]$Wsl
 $global:OliRepairWindows = [bool]$RepairWindows
+$global:OliWindows11 = [bool]$Windows11
 $global:OliScheduleUpdate = [bool]$ScheduleUpdate
 Write-Log ("run: {0}" -f $global:OliRunId)
 

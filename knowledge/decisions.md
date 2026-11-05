@@ -207,3 +207,23 @@ machine behaviour after the run ends.
 Decision: steps `13-repair`, `21-wsl` and `70-scheduled-update` are always in
 the plan but return immediately unless `-RepairWindows`, `-Wsl` or
 `-ScheduleUpdate` is passed. Their state checks make a second run a no-op.
+
+## ADR 16: Windows 11 upgrade runs from the Installation Assistant
+
+Status: accepted, 2026-11-05.
+
+The Surface Book 2 has had a 22H2 feature update stuck at 25 percent for
+hours, so Windows Update is not a reliable upgrade path on this machine. The
+i7-8650U is on Microsoft's supported CPU list and the machine has TPM 2.0 and
+Secure Boot, so Windows 11 is a supported destination.
+
+Decision: step `16-win11` is opt-in behind `-Windows11`. It refuses to run when
+TPM 2.0, Secure Boot, 25 GB free disk or a clean reboot state is missing. It
+downloads Microsoft's Installation Assistant, checks the Authenticode
+signature, and starts it. The script never reboots by itself and never enrols
+the machine in ESU. `15-updates` still refuses to install feature upgrades.
+
+Manual fallback, documented in the step output: the ISO from
+`https://www.microsoft.com/software-download/windows11`, mounted and run as
+`setup.exe`. The Media Creation Tool plus an 8 GB USB stick is the clean
+install path.
