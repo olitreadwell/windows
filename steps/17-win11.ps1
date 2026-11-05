@@ -23,7 +23,7 @@ if (-not (Test-IsAdmin)) {
 }
 
 if (Test-RebootPending) {
-    Write-Fail 'A restart is pending. Restart, then run: .\bootstrap.ps1 -Only 16-win11'
+    Write-Fail 'A restart is pending. Restart, then run: .\bootstrap.ps1 -Only 17-win11'
 }
 
 $freeGb = [math]::Round((Get-PSDrive -Name $env:SystemDrive.TrimEnd(':')).Free / 1GB, 1)
@@ -59,7 +59,7 @@ catch {
 
 if ($problems.Count -gt 0) {
     foreach ($problem in $problems) { Write-Warn $problem }
-    Write-Fail 'This machine does not meet the Windows 11 requirements yet. Fix the warnings, then re-run: .\bootstrap.ps1 -Only 16-win11'
+    Write-Fail 'This machine does not meet the Windows 11 requirements yet. Fix the warnings, then re-run: .\bootstrap.ps1 -Only 17-win11'
 }
 
 $machine = Get-MachineInfo

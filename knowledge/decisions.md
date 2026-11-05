@@ -217,7 +217,7 @@ hours, so Windows Update is not a reliable upgrade path on this machine. The
 i7-8650U is on Microsoft's supported CPU list and the machine has TPM 2.0 and
 Secure Boot, so Windows 11 is a supported destination.
 
-Decision: step `16-win11` is opt-in behind `-Windows11`. It refuses to run when
+Decision: step `17-win11` is opt-in behind `-Windows11`. It refuses to run when
 TPM 2.0, Secure Boot, 25 GB free disk or a clean reboot state is missing. It
 downloads Microsoft's Installation Assistant, checks the Authenticode
 signature, and starts it. The script never reboots by itself and never enrols
@@ -239,5 +239,5 @@ and the base build that ESU and the Windows 11 upgrade path expect.
 Decision: step `16-win10` is opt-in behind `-Windows10`. It skips when the
 build is already 19045, requires 20 GB free, downloads Microsoft's Windows 10
 Update Assistant, verifies the Authenticode signature, and runs it. It never
-reboots by itself. `16-win11` stays separate so the two upgrades are never
+reboots by itself. `17-win11` stays separate so the two upgrades are never
 queued in one run.
