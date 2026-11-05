@@ -328,3 +328,25 @@ function Reset-WindowsUpdateState {
     Write-Ok 'update services restarted'
     return $true
 }
+
+function Resume-WindowsUpdate {
+    <#
+    Removes the pause written by Suspend-WindowsUpdate. Setup needs Windows
+    Update reachable to fetch dynamic updates and drivers, and a paused
+    agent makes that phase fail with 0x80004005.
+    #>
+    $key = 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings'
+    if (-not (Test-Path $key)) { return }
+    foreach ($name in @(
+            'PauseUpdatesStartTime',
+            'PauseUpdatesExpiryTime',
+            'PauseFeatureUpdatesStartTime',
+            'PauseFeatureUpdatesEndTime',
+            'PauseQualityUpdatesStartTime',
+            'PauseQualityUpdatesEndTime')) {
+        Remove-ItemProperty -Path $key -Name $name -ErrorAction SilentlyContinue
+    }
+    if (-not (Get-RegistryValue -Path $key -Name PauseUpdatesExpiryTime)) {
+        Write-Ok 'Windows Update is not paused'
+    }
+}

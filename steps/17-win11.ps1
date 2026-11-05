@@ -79,6 +79,7 @@ if (-not $global:OliAssumeYes) {
 
 $downloads = Join-Path $HOME 'Downloads'
 if (-not (Test-Path $downloads)) { New-Item -ItemType Directory -Path $downloads -Force | Out-Null }
+Resume-WindowsUpdate | Out-Null
 $installer = Join-Path $downloads 'Windows11InstallationAssistant.exe'
 
 try {

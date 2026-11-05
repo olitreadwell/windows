@@ -24,6 +24,7 @@ if (-not (Test-IsAdmin)) {
     return
 }
 
+Resume-WindowsUpdate | Out-Null
 $taskName = 'OliWindows10Upgrade'
 $resumeFlag = Join-Path $global:OliStateDir 'win10-resume.flag'
 
