@@ -48,17 +48,18 @@ $stateDir = Get-StateDir
 $info | ConvertTo-Json -Depth 6 | Set-Content -Path (Join-Path $stateDir 'system-info.json') -Encoding UTF8
 Write-Ok ("machine snapshot: {0}" -f (Join-Path $stateDir 'system-info.json'))
 
-$fontKey = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts'
 $fontNames = @()
+$fontKey = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts'
 $fontProperties = Get-ItemProperty -Path $fontKey -ErrorAction SilentlyContinue
 if ($fontProperties) { $fontNames = @($fontProperties.PSObject.Properties.Name) }
-if ($fontNames -match 'JetBrainsMono Nerd Font') {
+$fontFiles = @(Get-ChildItem -Path (Join-Path $env:SystemRoot 'Fonts') -Filter '*JetBrains*' -ErrorAction SilentlyContinue)
+if (($fontNames -match 'JetBrains.*Nerd') -or ($fontFiles.Count -gt 0)) {
     Write-Ok 'JetBrainsMono Nerd Font installed'
 }
 else {
     Write-Warn 'Nerd Font missing; eza icons and the Starship prompt will show boxes'
+    Write-Host '  Set Windows Terminal > Profiles > Defaults > Appearance > Font face to JetBrainsMono Nerd Font.'
 }
-Write-Host '  Set Windows Terminal > Profiles > Defaults > Appearance > Font face to JetBrainsMono Nerd Font.'
 
 foreach ($module in @('PSFzf', 'Terminal-Icons')) {
     if (Get-Module -ListAvailable -Name $module) { Write-Ok ("module: {0}" -f $module) }
