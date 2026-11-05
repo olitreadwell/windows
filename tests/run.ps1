@@ -142,6 +142,7 @@ foreach ($id in @($core + $ai + $apps)) {
 $bootstrapText = Get-Content -Path (Join-Path $repoRoot 'bootstrap.ps1') -Raw
 if ($bootstrapText -notmatch 'SkipUpdates') { Add-Failure 'bootstrap.ps1 has no -SkipUpdates switch' }
 if ($bootstrapText -notmatch 'Parallel') { Add-Failure 'bootstrap.ps1 has no -Parallel switch' }
+if ($bootstrapText -notmatch 'ChildRun') { Add-Failure 'bootstrap.ps1 has no -ChildRun switch' }
 if ($bootstrapText -notmatch 'OptionalApps') { Add-Failure 'bootstrap.ps1 has no -OptionalApps switch' }
 
 $profileText = Get-Content -Path (Join-Path $repoRoot 'config/profile/Microsoft.PowerShell_profile.ps1') -Raw

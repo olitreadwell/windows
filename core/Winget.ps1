@@ -92,6 +92,7 @@ function Install-WingetPackage {
     $startInfo.UseShellExecute = $false
     $process = [System.Diagnostics.Process]::Start($startInfo)
     if (-not $process.WaitForExit($timeoutMinutes * 60000)) {
+        & taskkill.exe /PID $process.Id /T /F 2>$null | Out-Null
         try { $process.Kill() } catch { }
         Write-Warn ("winget timed out after {0} minutes: {1} ({2}). Close the app and re-run." -f $timeoutMinutes, $Name, $Id)
         Write-Warn 'Override with: $env:OLI_WINGET_TIMEOUT_MINUTES = 15'

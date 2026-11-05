@@ -4,13 +4,22 @@ Set-StrictMode -Version 2.0
 $required = @('winget', 'git', 'gh', 'op', 'pwsh', 'mise', 'codex', 'claude')
 $missing = @()
 foreach ($tool in $required) {
-    if (Test-CommandExists $tool) {
+    if (Test-CommandWorks -Name $tool) {
         Write-Ok ("found: {0}" -f $tool)
     }
     else {
         Write-Warn ("missing: {0}" -f $tool)
         $missing += $tool
     }
+}
+
+if (Test-CommandWorks -Name 'gh') {
+    & gh auth status 2>$null | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Warn 'gh is installed but not authenticated. Run: gh auth login --web' }
+}
+if (Test-CommandWorks -Name 'op') {
+    & op account list 2>$null | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Warn '1Password CLI is installed but not signed in' }
 }
 
 if (Test-CommandExists 'git') {

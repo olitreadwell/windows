@@ -37,7 +37,14 @@ function Update-GitRepo {
     }
 
     if (-not $useGh) {
-        Write-Fail ("{0} needs GitHub auth. Run: gh auth login --web, then: .\bootstrap.ps1 -From 30-auth" -f $Repo)
+        # Public repos clone without auth; private ones fall through to the
+        # login instruction instead of a raw credential error.
+        & git -c credential.interactive=false clone ("https://github.com/{0}.git" -f $Repo) $Destination
+        if ($LASTEXITCODE -ne 0) {
+            Write-Fail ("{0} needs GitHub auth. Run: gh auth login --web, then: .\bootstrap.ps1 -From 30-auth" -f $Repo)
+        }
+        Write-Ok "cloned: $Repo"
+        return
     }
 
     & gh repo clone $Repo $Destination
@@ -54,6 +61,15 @@ Update-GitRepo -Repo 'olitreadwell/ai-harness' -Destination $harness
 Install-AgentHarness -HarnessDir $harness
 
 Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'config/gitconfig.txt') -Destination (Join-Path $HOME '.gitconfig') -CopyOnly | Out-Null
+# The copy replaces the helper that step 30 configured, so reapply it here.
+if (Test-CommandExists 'gh') {
+    & gh auth status 2>$null | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        & gh auth setup-git 2>$null | Out-Null
+        if ($LASTEXITCODE -eq 0) { Write-Ok 'gh credential helper reapplied after the git config copy' }
+        else { Write-Warn 'gh auth setup-git failed after the git config copy' }
+    }
+}
 Set-ManagedFile -Source (Join-Path $dotfiles 'dot_gitignore_global') -Destination (Join-Path $HOME '.gitignore_global') | Out-Null
 Set-ManagedFile -Source (Join-Path $dotfiles 'gitmessage') -Destination (Join-Path $HOME '.gitmessage') | Out-Null
 Set-ManagedFile -Source (Join-Path $dotfiles 'dot_config/gh/config.yml') -Destination (Join-Path $HOME '.config/gh/config.yml') -CopyOnly | Out-Null

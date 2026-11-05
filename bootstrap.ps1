@@ -32,6 +32,7 @@ param(
     [switch]$Wsl,
     [switch]$RepairWindows,
     [switch]$ScheduleUpdate,
+    [switch]$ChildRun,
     [switch]$SkipUpdates,
     [switch]$DryRun,
     [switch]$Yes,
@@ -91,7 +92,7 @@ if ($plan.Count -eq 0) {
 Write-Log ("plan: {0}" -f ($plan -join ' -> '))
 if ($SkipUpdates) {
     Write-Warn 'Skipping 15-updates. This machine stays unpatched until you run it.'
-    if (-not $DryRun) {
+    if (-not $DryRun -and -not $ChildRun) {
         Suspend-WindowsUpdate -Days 7 | Out-Null
         Write-Warn 'A stuck feature update keeps retrying unless you restart, which rolls the attempt back.'
     }
@@ -150,24 +151,34 @@ if ($useParallel) {
 
 $children = @()
 $appsIndex = [Array]::IndexOf($serialPlan, '27-apps')
-for ($index = 0; $index -lt $serialPlan.Count; $index++) {
-    if ($useParallel -and $index -eq $appsIndex -and $sidecars.Count -gt 0) {
-        foreach ($sidecar in $sidecars) {
-            Write-Log ("starting in parallel: {0}" -f $sidecar)
-            $arguments = '-NoProfile -ExecutionPolicy Bypass -File "{0}" -Only {1} -SkipUpdates -Yes' -f $bootstrapPath, $sidecar
-            $process = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -PassThru
-            $children += [pscustomobject]@{ Step = $sidecar; Process = $process }
+try {
+    for ($index = 0; $index -lt $serialPlan.Count; $index++) {
+        if ($useParallel -and $index -eq $appsIndex -and $sidecars.Count -gt 0) {
+            foreach ($sidecar in $sidecars) {
+                Write-Log ("starting in parallel: {0}" -f $sidecar)
+                $arguments = '-NoProfile -ExecutionPolicy Bypass -File "{0}" -Only {1} -SkipUpdates -Yes -ChildRun' -f $bootstrapPath, $sidecar
+                $process = Start-Process -FilePath 'powershell.exe' -ArgumentList $arguments -PassThru
+                $children += [pscustomobject]@{ Step = $sidecar; Process = $process }
+            }
+        }
+        Invoke-Step -Step $serialPlan[$index]
+    }
+
+    foreach ($child in $children) {
+        $child.Process.WaitForExit()
+        if ($child.Process.ExitCode -ne 0) {
+            Write-Fail ("parallel step failed: {0} (exit {1}) | resume: .\bootstrap.ps1 -Only {0}" -f $child.Step, $child.Process.ExitCode)
+        }
+        Write-Ok ("parallel step finished: {0}" -f $child.Step)
+    }
+}
+finally {
+    foreach ($child in $children) {
+        if (-not $child.Process.HasExited) {
+            Write-Warn ("stopping parallel step: {0}" -f $child.Step)
+            try { $child.Process.Kill() } catch { }
         }
     }
-    Invoke-Step -Step $serialPlan[$index]
-}
-
-foreach ($child in $children) {
-    $child.Process.WaitForExit()
-    if ($child.Process.ExitCode -ne 0) {
-        Write-Fail ("parallel step failed: {0} (exit {1}) | resume: .\bootstrap.ps1 -Only {0}" -f $child.Step, $child.Process.ExitCode)
-    }
-    Write-Ok ("parallel step finished: {0}" -f $child.Step)
 }
 
 try { Save-RunSummary -Status 'ok' -Started $started -Steps $script:stepResults }
