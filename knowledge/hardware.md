@@ -54,6 +54,13 @@ The 15 inch model can draw more power than its 95 W supply under sustained
 CPU and GPU load, so the battery drains even while plugged in. Do not run
 long compute jobs on it at full load.
 
+The 13.5 inch i7 with the GTX 1050 has the same limit in a smaller chassis.
+For long installs, keep the charger connected, leave the machine on a hard
+surface, and expect the CPU to settle near 2.1 GHz rather than the 4.2 GHz
+boost. Thermal throttling during a full provisioning run is normal, not a
+fault. Check the battery wear in `battery-report.html` before trusting an
+unattended run on battery.
+
 ## Battery check
 
 The preflight step writes an HTML battery report to

@@ -28,6 +28,20 @@ if ($miseExit -ne 0) {
     Install-WingetPackage -Id 'Oven-sh.Bun' | Out-Null
     Write-Warn 'Run: fnm install --lts'
     Write-Warn 'Then check: bun --version; uv --version'
+
+    # Report the tools from mise.toml that still have no command, so the gap
+    # is named instead of discovered later by a failing build.
+    $declared = @()
+    $inTools = $false
+    foreach ($line in Get-Content -LiteralPath $configPath) {
+        if ($line -match '^\[(.+)\]$') { $inTools = ($Matches[1] -eq 'tools'); continue }
+        if ($inTools -and $line -match '^\s*([A-Za-z0-9_-]+)\s*=') { $declared += $Matches[1] }
+    }
+    $unavailable = @($declared | Where-Object { -not (Test-CommandWorks -Name $_) })
+    if ($unavailable.Count -gt 0) {
+        Write-Warn ("runtimes still missing: {0}" -f ($unavailable -join ', '))
+        Write-Warn 'Install them with winget before relying on this machine for that language.'
+    }
     return
 }
 

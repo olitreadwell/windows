@@ -12,6 +12,9 @@ if ($packages.Count -eq 0) {
     return
 }
 
+$startBefore = @()
+try { $startBefore = @(Get-StartApps | ForEach-Object { $_.Name }) } catch { }
+
 $failed = @()
 foreach ($id in $packages) {
     if (-not (Install-WingetPackage -Id $id)) { $failed += $id }
@@ -28,6 +31,14 @@ $missingApps = @()
 foreach ($id in $packages) {
     if (-not (Test-WingetPackage -Id $id)) { $missingApps += $id }
 }
+try {
+    $startAfter = @(Get-StartApps | ForEach-Object { $_.Name })
+    $newEntries = @($startAfter | Where-Object { $startBefore -notcontains $_ } | Sort-Object)
+    if ($newEntries.Count -gt 0) { Write-Ok ("new Start menu entries: {0}" -f ($newEntries -join ', ')) }
+    else { Write-Log 'no new Start menu entries appeared; check the app list by name' }
+}
+catch { Write-Verbose 'Start menu index unavailable' }
+
 if ($missingApps.Count -gt 0) {
     Write-Warn ("winget does not list these apps: {0}" -f ($missingApps -join ', '))
     Write-Warn 'Open the Start menu and search by name before reinstalling.'
