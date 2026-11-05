@@ -128,6 +128,13 @@ function logs {
     else { Write-Warning 'no log directory yet' }
 }
 
+function apps {
+    param([string]$Filter)
+    $script = Join-Path $HOME 'bin\installed-apps.ps1'
+    if (Test-Path $script) { & $script -Filter $Filter }
+    else { Write-Warning 'installed-apps.ps1 is missing. Re-run: .\bootstrap.ps1 -Only 40-dotfiles' }
+}
+
 function doctor {
     wupdate
     Write-Host ''

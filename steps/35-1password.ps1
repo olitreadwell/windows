@@ -1,6 +1,33 @@
 # 1Password app, CLI, and the SSH agent pipe.
 Set-StrictMode -Version 2.0
 
+# A per-user MSI install sometimes lands without a Start menu shortcut, or
+# leaves one pointing at the old version. Repair it from the real exe.
+$appExe = Join-Path $env:LOCALAPPDATA '1Password\app\8\1Password.exe'
+$startShortcut = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\1Password.lnk'
+if (Test-Path $appExe) {
+    $needsShortcut = $true
+    if (Test-Path $startShortcut) {
+        $shell = New-Object -ComObject WScript.Shell
+        $existing = $shell.CreateShortcut($startShortcut)
+        $needsShortcut = ($existing.TargetPath -ne $appExe)
+    }
+    if ($needsShortcut) {
+        $shell = New-Object -ComObject WScript.Shell
+        $shortcut = $shell.CreateShortcut($startShortcut)
+        $shortcut.TargetPath = $appExe
+        $shortcut.WorkingDirectory = Split-Path -Parent $appExe
+        $shortcut.Save()
+        Write-Ok '1Password Start menu shortcut repaired'
+    }
+    else {
+        Write-Ok '1Password Start menu shortcut present'
+    }
+}
+else {
+    Write-Warn '1Password app exe not found. Install AgileBits.1Password, then re-run this step.'
+}
+
 $opReady = $false
 if (-not (Test-CommandExists 'op')) {
     Write-Warn 'op CLI is missing. Install AgileBits.1Password.CLI with winget.'
