@@ -1,5 +1,6 @@
 # Runtimes through mise. Fallbacks are installed separately as CLI tools.
 Set-StrictMode -Version 2.0
+$ErrorActionPreference = 'Continue'
 
 if (-not (Test-CommandExists 'mise')) {
     Write-Warn 'mise is missing. Re-run 25-core-tools, or install it with: winget install jdx.mise'

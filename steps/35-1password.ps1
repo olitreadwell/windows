@@ -1,5 +1,6 @@
 # 1Password app, CLI, and the SSH agent pipe.
 Set-StrictMode -Version 2.0
+$ErrorActionPreference = 'Continue'
 
 # A per-user MSI install sometimes lands without a Start menu shortcut, or
 # leaves one pointing at the old version. Repair it from the real exe.

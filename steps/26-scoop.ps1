@@ -6,6 +6,7 @@
 # normal window instead of installing a global copy that needs admin for
 # every later package.
 Set-StrictMode -Version 2.0
+$ErrorActionPreference = 'Continue'
 
 $scoopShim = Join-Path $HOME 'scoop/shims/scoop.cmd'
 if ((Test-CommandExists 'scoop') -or (Test-Path $scoopShim)) {

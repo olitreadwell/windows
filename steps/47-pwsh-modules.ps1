@@ -1,6 +1,7 @@
 # PowerShell module bundle. This is the closest Windows has to an oh-my-zsh
 # plugin set: fuzzy history and files, plus file icons in Get-ChildItem.
 Set-StrictMode -Version 2.0
+$ErrorActionPreference = 'Continue'
 
 $modules = @('PSFzf', 'Terminal-Icons')
 $missing = @($modules | Where-Object { -not (Get-Module -ListAvailable -Name $_) })

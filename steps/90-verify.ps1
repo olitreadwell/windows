@@ -1,5 +1,6 @@
 # Final check: what works now, and what still needs a human.
 Set-StrictMode -Version 2.0
+$ErrorActionPreference = 'Continue'
 
 $required = @('winget', 'git', 'gh', 'op', 'pwsh', 'mise', 'codex', 'claude')
 $missing = @()

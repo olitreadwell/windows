@@ -1,6 +1,7 @@
 # Opt-in WSL2. Two Windows features, then a reboot before any distribution
 # can install. Only runs with -Wsl.
 Set-StrictMode -Version 2.0
+$ErrorActionPreference = 'Continue'
 
 $enabled = $false
 $flag = Get-Variable -Name OliInstallWsl -Scope Global -ErrorAction SilentlyContinue

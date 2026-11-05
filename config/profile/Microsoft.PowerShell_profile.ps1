@@ -23,6 +23,7 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
 }
 
 if (Get-Command mise -ErrorAction SilentlyContinue) {
+    $env:MISE_PWSH_CHPWD_WARNING = '0'
     $miseInit = & mise activate pwsh 2>$null
     if ($miseInit) { Invoke-Expression ($miseInit | Out-String) }
 }

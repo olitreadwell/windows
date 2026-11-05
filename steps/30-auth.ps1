@@ -1,5 +1,6 @@
 # GitHub CLI auth. Interactive by default; -Yes leaves it for the human.
 Set-StrictMode -Version 2.0
+$ErrorActionPreference = 'Continue'
 
 if (-not (Test-CommandExists 'gh')) {
     Write-Warn 'gh is not installed; skipping GitHub auth'
