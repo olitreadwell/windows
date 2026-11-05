@@ -40,6 +40,7 @@ Wilfred.difftastic
 astral-sh.ruff
 Clement.bottom
 sharkdp.hyperfine
+Zellij.Zellij
 
 # [ai] are the agent CLIs. Auth stays interactive.
 # Anthropic.ClaudeCode is the CLI. Anthropic.Claude is the desktop app.
@@ -54,7 +55,6 @@ SST.opencode
 Google.Chrome
 Mozilla.Firefox
 Brave.Brave
-Microsoft.VisualStudioCode
 Obsidian.Obsidian
 Spotify.Spotify
 Microsoft.PowerToys

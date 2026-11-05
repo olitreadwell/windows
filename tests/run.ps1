@@ -29,6 +29,7 @@ $required = @(
     'AGENTS.md',
     'CODING_STANDARDS.md',
     'config/packages.txt',
+    'config/alacritty/alacritty.toml',
     'config/gitconfig.txt',
     'config/mise.toml',
     'config/codex/config.toml',

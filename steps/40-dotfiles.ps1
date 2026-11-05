@@ -36,8 +36,11 @@ function Update-GitRepo {
         return
     }
 
-    if ($useGh) { & gh repo clone $Repo $Destination }
-    else { & git -c credential.interactive=false clone ("https://github.com/{0}.git" -f $Repo) $Destination }
+    if (-not $useGh) {
+        Write-Fail ("{0} needs GitHub auth. Run: gh auth login --web, then: .\bootstrap.ps1 -From 30-auth" -f $Repo)
+    }
+
+    & gh repo clone $Repo $Destination
 
     if ($LASTEXITCODE -ne 0) { Write-Fail "clone failed: $Repo" }
     Write-Ok "cloned: $Repo"
@@ -59,6 +62,9 @@ $starshipSource = Join-Path $global:OliRepoRoot 'config/starship.toml'
 Set-ManagedFile -Source $starshipSource -Destination (Join-Path $HOME '.config/starship.toml') | Out-Null
 
 Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'config/mise.toml') -Destination (Join-Path $HOME '.config/mise/config.toml') | Out-Null
+
+$alacrittyDir = Join-Path $env:APPDATA 'alacritty'
+Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'config/alacritty/alacritty.toml') -Destination (Join-Path $alacrittyDir 'alacritty.toml') | Out-Null
 
 $binDir = Join-Path $HOME 'bin'
 Set-ManagedFile -Source (Join-Path $global:OliRepoRoot 'scripts/Update-All.ps1') -Destination (Join-Path $binDir 'update.ps1') -CopyOnly | Out-Null
