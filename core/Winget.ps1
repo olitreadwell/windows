@@ -54,9 +54,21 @@ function Install-WingetPackage {
     }
 
     Write-Log "installing: $Name ($Id)"
-    & winget install --id $Id --exact --silent --disable-interactivity --accept-source-agreements --accept-package-agreements
-    if ($LASTEXITCODE -ne 0) {
-        Write-Warn "winget failed: $Name ($Id) exit $LASTEXITCODE"
+    # A running GUI app can block its own upgrade behind a hidden installer
+    # prompt. 1Password is the common case on this machine.
+    if ($Id -eq 'AgileBits.1Password') {
+        Get-Process -Name '1Password' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    }
+
+    $argumentLine = 'install --id {0} --exact --silent --disable-interactivity --accept-source-agreements --accept-package-agreements' -f $Id
+    $process = Start-Process -FilePath 'winget.exe' -ArgumentList $argumentLine -NoNewWindow -PassThru
+    if (-not $process.WaitForExit(900000)) {
+        $process.Kill()
+        Write-Warn "winget timed out after 15 minutes: $Name ($Id). Close the app and re-run."
+        return $false
+    }
+    if ($process.ExitCode -ne 0) {
+        Write-Warn "winget failed: $Name ($Id) exit $($process.ExitCode)"
         return $false
     }
 
