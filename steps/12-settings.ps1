@@ -9,6 +9,7 @@ if (-not (Test-IsAdmin)) {
 
 # Long paths. Deep node_modules and git checkouts fail without this.
 $changed = $false
+$explorerChanged = $false
 $fileSystem = 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem'
 if ((Get-RegistryValue -Path $fileSystem -Name LongPathsEnabled) -ne 1) {
     Set-ItemProperty -Path $fileSystem -Name LongPathsEnabled -Value 1 -Type DWord
@@ -38,6 +39,7 @@ if (-not (Test-Path $advanced)) { New-Item -Path $advanced -Force | Out-Null }
 if ((Get-RegistryValue -Path $advanced -Name HideFileExt) -ne 0) {
     Set-ItemProperty -Path $advanced -Name HideFileExt -Value 0 -Type DWord
     $changed = $true
+    $explorerChanged = $true
     Write-Ok 'file extensions shown'
 }
 else {
@@ -46,6 +48,7 @@ else {
 if ((Get-RegistryValue -Path $advanced -Name FullPath) -ne 1) {
     Set-ItemProperty -Path $advanced -Name FullPath -Value 1 -Type DWord
     $changed = $true
+    $explorerChanged = $true
     Write-Ok 'full path shown in Explorer title'
 }
 else {
@@ -56,6 +59,7 @@ else {
 if ((Get-RegistryValue -Path $advanced -Name LaunchTo) -ne 1) {
     Set-ItemProperty -Path $advanced -Name LaunchTo -Value 1 -Type DWord
     $changed = $true
+    $explorerChanged = $true
     Write-Ok 'Explorer opens This PC'
 }
 else {
@@ -91,10 +95,12 @@ if (Test-Path $delivery) {
 # signature, so RemoteSigned is the usual developer setting.
 try {
     $policy = Get-ExecutionPolicy -Scope CurrentUser
-    if ($policy -ne 'RemoteSigned' -and $policy -ne 'Unrestricted' -and $policy -ne 'Bypass') {
+    if ($policy -in @('Restricted', 'Undefined', 'Default')) {
         Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force -ErrorAction Stop
         Write-Ok 'execution policy set to RemoteSigned for the current user'
-        $changed = $true
+    }
+    elseif ($policy -eq 'AllSigned') {
+        Write-Warn 'execution policy stays AllSigned; local unsigned scripts will be blocked'
     }
     else {
         Write-Ok ("execution policy already permissive: {0}" -f $policy)
@@ -121,7 +127,7 @@ catch {
 
 # Restart Explorer so the Explorer changes appear without a sign-out.
 $explorer = Get-Process -Name explorer -ErrorAction SilentlyContinue
-if ($changed -and $explorer) {
+if ($explorerChanged -and $explorer) {
     Write-Log 'restarting Explorer to apply the folder settings'
     Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 2

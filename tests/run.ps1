@@ -57,6 +57,7 @@ foreach ($relative in $required) {
 
 $testStateRoot = Join-Path ([IO.Path]::GetTempPath()) ("oli-windows-state-" + [guid]::NewGuid().ToString())
 New-Item -ItemType Directory -Path $testStateRoot -Force | Out-Null
+$originalLocalAppData = $env:LOCALAPPDATA
 $env:LOCALAPPDATA = $testStateRoot
 Initialize-Log -RepoRoot $repoRoot
 
@@ -155,8 +156,18 @@ else {
 
 $profilePath = Join-Path $repoRoot 'config/profile/Microsoft.PowerShell_profile.ps1'
 $hostPath = (Get-Process -Id $PID).Path
+$originalHome = $env:HOME
+$originalUserProfile = $env:USERPROFILE
+$originalPreference = $ErrorActionPreference
+$env:HOME = $testStateRoot
+$env:USERPROFILE = $testStateRoot
+$ErrorActionPreference = 'Continue'
 & $hostPath -NoProfile -Command ". '$profilePath'" 2>&1 | Out-Null
-if ($LASTEXITCODE -ne 0) { Add-Failure 'profile failed to load in a child process' }
+$profileExit = $LASTEXITCODE
+$ErrorActionPreference = $originalPreference
+$env:HOME = $originalHome
+$env:USERPROFILE = $originalUserProfile
+if ($profileExit -ne 0) { Add-Failure 'profile failed to load in a child process' }
 
 Write-Log 'ledger test line'
 Save-RunSummary -Status 'test' -Started (Get-Date) -Steps @()
@@ -194,6 +205,7 @@ try {
 finally {
     Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath $testStateRoot -Recurse -Force -ErrorAction SilentlyContinue
+    $env:LOCALAPPDATA = $originalLocalAppData
 }
 
 if ($script:failures -gt 0) {

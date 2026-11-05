@@ -28,14 +28,13 @@ if (-not $module) {
     catch {
         Write-Warn ("PSWindowsUpdate install failed: {0}" -f $_.Exception.Message)
         Write-Warn 'Open Settings > Update & Security > Windows Update and install everything by hand.'
-        return
+        Write-Fail 'Windows Update could not run. Use -SkipUpdates to provision the rest, then repair Windows Update.'
     }
 }
 
 Import-Module PSWindowsUpdate -ErrorAction SilentlyContinue
 if (-not (Get-Command Get-WindowsUpdate -ErrorAction SilentlyContinue)) {
-    Write-Warn 'Get-WindowsUpdate is unavailable. Use Settings > Windows Update manually.'
-    return
+    Write-Fail 'Get-WindowsUpdate is unavailable. Use -SkipUpdates to provision the rest, or update by hand in Settings.'
 }
 
 $upgrades = @()
@@ -75,7 +74,7 @@ catch {
     Write-Warn ("update install failed: {0}" -f $_.Exception.Message)
     Write-Warn 'Open Settings > Update & Security > Windows Update and read the error code.'
     Write-Warn 'Details: .\scripts\Diagnose-WindowsUpdate.ps1'
-    return
+    Write-Fail 'Windows Update install failed. Use -SkipUpdates to provision the rest.'
 }
 
 $failedUpdates = @($results | Where-Object { $_.PSObject.Properties['Result'] -and $_.Result -eq 'Failed' })
@@ -88,9 +87,13 @@ if (Test-RebootPending) {
 }
 
 $remaining = @()
+$recheckOk = $true
 try { $remaining = @(Get-WindowsUpdate -NotCategory 'Upgrades', 'Feature Packs' -ErrorAction Stop) }
-catch { Write-Warn ("could not re-check pending updates: {0}" -f $_.Exception.Message) }
-if ($remaining.Count -gt 0) {
+catch { $recheckOk = $false; Write-Warn ("could not re-check pending updates: {0}" -f $_.Exception.Message) }
+if (-not $recheckOk) {
+    Write-Warn 'Update state is unknown. Check Settings > Windows Update before assuming this step is done.'
+}
+elseif ($remaining.Count -gt 0) {
     Write-Warn ("{0} update(s) still pending. Restart and re-run, or read the error code in Settings." -f $remaining.Count)
 }
 else {

@@ -33,20 +33,28 @@ foreach ($raw in Get-Content -LiteralPath $manifest) {
         continue
     }
 
+    if (-not $useGh -and $global:OliAssumeYes) {
+        Write-Warn ("needs gh auth; skipping clone: {0}" -f $repo)
+        continue
+    }
+
+    $backup = $null
     if (Test-Path $destination) {
         $backup = "$destination.bak.$(Get-Date -Format 'yyyyMMddHHmmss')"
         Move-Item -LiteralPath $destination -Destination $backup
         Write-Warn "moved non-git directory aside: $destination -> $backup"
     }
 
-    if (-not $useGh -and $global:OliAssumeYes) {
-        Write-Warn ("needs gh auth; skipping clone: {0}" -f $repo)
-        continue
-    }
-
     if ($useGh) { & gh repo clone ("olitreadwell/{0}" -f $repo) $destination }
     else { & git clone ("https://github.com/olitreadwell/{0}.git" -f $repo) $destination }
 
-    if ($LASTEXITCODE -ne 0) { Write-Warn "clone failed: $repo" }
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warn "clone failed: $repo"
+        if ($backup) {
+            if (Test-Path $destination) { Remove-Item -LiteralPath $destination -Recurse -Force -ErrorAction SilentlyContinue }
+            Move-Item -LiteralPath $backup -Destination $destination -ErrorAction SilentlyContinue
+            Write-Warn "restored the original directory: $destination"
+        }
+    }
     else { Write-Ok "cloned: $repo" }
 }

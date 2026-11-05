@@ -38,6 +38,11 @@ $pattern = '(?s)' + [regex]::Escape($begin) + '.*?' + [regex]::Escape($end) + '\
 # SSH uses the first value it finds, so the block goes at the top. Any
 # earlier copy is removed first, which also makes a second run a no-op.
 $stripped = [regex]::Replace($existing, $pattern, '')
+if ($stripped -match [regex]::Escape($begin)) {
+    # A BEGIN without a matching END. Cut from the stray marker to the end.
+    $index = $stripped.IndexOf($begin)
+    $stripped = $stripped.Substring(0, $index)
+}
 $updated = $block + "`r`n" + $stripped
 
 if ($updated -eq $existing) {
