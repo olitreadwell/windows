@@ -32,7 +32,7 @@ powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -Windows11
 [CmdletBinding()]
 param(
     [string]$From,
-    [string]$Only,
+    [string[]]$Only,
     [switch]$Parallel,
     [switch]$OptionalApps,
     [switch]$Wsl,
