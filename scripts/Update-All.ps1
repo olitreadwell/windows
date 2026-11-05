@@ -21,6 +21,8 @@ param(
 
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Continue'
+# Progress bars read the console buffer, which fails in a non-interactive session.
+$ProgressPreference = 'SilentlyContinue'
 
 function Write-Section {
     param([string]$Text)
