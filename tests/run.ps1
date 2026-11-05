@@ -92,7 +92,7 @@ foreach ($name in $generations.Keys) {
 $plan = @(Get-StepPlan -RepoRoot $repoRoot)
 if ($plan.Count -eq 0) { Add-Failure 'empty step plan' }
 $expectedSteps = @(
-    '10-preflight', '12-settings', '15-updates', '20-winget',
+    '10-preflight', '12-settings', '14-remote', '15-updates', '20-winget',
     '25-core-tools', '26-scoop', '30-auth', '35-1password',
     '40-dotfiles', '45-runtimes', '47-pwsh-modules', '50-ai-tools',
     '60-apps', '65-repos', '90-verify'
@@ -157,6 +157,8 @@ if (-not (Get-Command Test-CommandWorks -ErrorAction SilentlyContinue)) { Add-Fa
 else {
     if (Test-CommandWorks -Name 'definitely-not-a-real-command-xyz') { Add-Failure 'Test-CommandWorks accepted a missing command' }
 }
+
+if (-not (Get-Command Suspend-WindowsUpdate -ErrorAction SilentlyContinue)) { Add-Failure 'Suspend-WindowsUpdate is missing' }
 
 $profilePath = Join-Path $repoRoot 'config/profile/Microsoft.PowerShell_profile.ps1'
 $hostPath = (Get-Process -Id $PID).Path

@@ -54,6 +54,47 @@ function Get-RegistryValue {
     }
 }
 
+function Suspend-WindowsUpdate {
+    <#
+    Pauses feature and quality updates for a few days. Used by -SkipUpdates
+    so a stuck feature install stops being retried while the machine gets
+    provisioned. It does not cancel a setup already in progress; a restart
+    rolls that attempt back.
+    #>
+    param([int]$Days = 7)
+
+    if (-not (Test-IsAdmin)) {
+        Write-Warn 'Windows Update pause needs admin. Run elevated to pause it.'
+        return $false
+    }
+
+    $key = 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings'
+    if (-not (Test-Path $key)) { New-Item -Path $key -Force | Out-Null }
+
+    $start = (Get-Date).ToUniversalTime()
+    $end = $start.AddDays($Days)
+    $format = 'yyyy-MM-ddTHH:mm:ssZ'
+    $values = @{
+        PauseUpdatesStartTime        = $start.ToString($format)
+        PauseUpdatesExpiryTime       = $end.ToString($format)
+        PauseFeatureUpdatesStartTime = $start.ToString($format)
+        PauseFeatureUpdatesEndTime   = $end.ToString($format)
+        PauseQualityUpdatesStartTime = $start.ToString($format)
+        PauseQualityUpdatesEndTime   = $end.ToString($format)
+    }
+    foreach ($name in $values.Keys) {
+        Set-ItemProperty -Path $key -Name $name -Value $values[$name] -Type String -ErrorAction SilentlyContinue
+    }
+
+    $check = Get-RegistryValue -Path $key -Name PauseUpdatesExpiryTime
+    if ($check) {
+        Write-Ok ("Windows Update paused until {0}" -f $end.ToString('yyyy-MM-dd'))
+        return $true
+    }
+    Write-Warn 'Windows Update pause was not recorded. Pause it manually in Settings.'
+    return $false
+}
+
 function Get-StateDir {
     if (-not (Test-Path $global:OliStateDir)) {
         New-Item -ItemType Directory -Path $global:OliStateDir -Force | Out-Null

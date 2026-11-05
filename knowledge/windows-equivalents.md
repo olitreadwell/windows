@@ -157,5 +157,17 @@ No winget package found: Equicord (a Discord client mod, install from its
 own site), Orca (the macOS agent IDE), Paseo, and Scoop (install script, see
 the README).
 
+## Remote access
+
+| Option | How | Trade-off |
+| --- | --- | --- |
+| RDP over Tailscale | step `14-remote` plus Tailscale | Native, fast, needs Windows Pro and an account password |
+| RustDesk | download from rustdesk.com | Open source, no winget package, needs a relay or self-hosted server |
+| Headscale | self-hosted Tailscale control server | Only worth it with a server to run and a reason to leave Tailscale's free plan |
+
+RustDesk is not in `microsoft/winget-pkgs`, so the bootstrap does not install
+it. Headscale is a control server, not a client; the Tailscale client is
+already in the app list.
+
 Optional, not installed: DBeaver (`DBeaver.DBeaver`) for database GUIs,
 Docker Desktop (needs WSL2), minikube and PostgreSQL 16.

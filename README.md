@@ -88,7 +88,8 @@ repo; the bootstrap still installs git and clones `dotfiles` and
 - `.\bootstrap.ps1 -From 40-dotfiles` resumes from a step.
 - `.\bootstrap.ps1 -Only 90-verify` runs one step.
 - `.\bootstrap.ps1 -Only 26-scoop` prints the Scoop command (run it from a normal window).
-- `.\bootstrap.ps1 -SkipUpdates` runs every step except Windows Update.
+- `.\bootstrap.ps1 -SkipUpdates` runs every step except Windows Update and
+  pauses updates for 7 days, so a stuck feature install stops retrying.
 - `.\bootstrap.ps1 -Yes` skips interactive auth prompts with warnings.
 - `.\bootstrap.ps1 -NoAdmin` skips the elevation guard. Admin-only steps will fail.
 - `.\scripts\Update-All.ps1` updates winget packages, mise runtimes and `gh` extensions.
@@ -133,19 +134,21 @@ scoop bucket add extras
    extensions, full path in the Explorer title, Explorer opening This PC,
    clipboard history, tips off, RemoteSigned execution policy for the
    current user, Defender PUA protection and reversed scroll direction.
-3. Installs pending security and quality updates without feature upgrades or an automatic reboot.
-4. Ensures `winget`, then installs the core CLI tools: `bat`, `eza`, `delta`,
+3. Enables Remote Desktop over Tailscale, limited to the Tailscale address
+   range and the local subnet.
+4. Installs pending security and quality updates without feature upgrades or an automatic reboot.
+5. Ensures `winget`, then installs the core CLI tools: `bat`, `eza`, `delta`,
    `fzf`, `zoxide`, `ripgrep`, `fd`, `jq`, `ffmpeg`, the cloud and Kubernetes
    CLIs, a Nerd Font and `gsudo`.
-5. Authenticates `gh`, installs 1Password and configures its SSH agent pipe.
-6. Clones `dotfiles` and `ai-harness`, then links the Windows-safe configs.
-7. Installs runtimes through `mise`. `fnm` and `bun` are installed only if `mise` fails.
-8. Installs the PowerShell module bundle: `PSFzf` for fuzzy history and files,
+6. Authenticates `gh`, installs 1Password and configures its SSH agent pipe.
+7. Clones `dotfiles` and `ai-harness`, then links the Windows-safe configs.
+8. Installs runtimes through `mise`. `fnm` and `bun` are installed only if `mise` fails.
+9. Installs the PowerShell module bundle: `PSFzf` for fuzzy history and files,
    and `Terminal-Icons` for icons in `Get-ChildItem`.
-9. Installs Codex CLI, Claude Code and Ollama, generates Codex tab completion
+10. Installs Codex CLI, Claude Code and Ollama, generates Codex tab completion
    and prompts for auth unless you pass `-Yes`.
-10. Installs the GUI apps from `config/packages.txt`.
-11. Verifies the result and prints the remaining manual actions.
+11. Installs the GUI apps from `config/packages.txt`.
+12. Verifies the result and prints the remaining manual actions.
 
 A full run downloads several GB. The macOS to Windows mapping, including
 what is optional and what has no equivalent, is in

@@ -144,6 +144,14 @@ Repeat until it reports no pending updates, then continue with
   Terminal JSON file alone.
 - Restart once more so PATH changes reach every app.
 
+## Remote access from the Mac
+
+Step `14-remote` enables RDP and limits the firewall rule to the Tailscale
+range. On the Surface Book, sign in to Tailscale and note its `100.x` address.
+On the Mac, install Tailscale and the Windows App (Microsoft Remote Desktop),
+then connect to that `100.x` address with the Windows account name and
+password. The PIN does not work for RDP.
+
 ## 8. Record the machine
 
 Copy the non-identifying values into `knowledge/current-machine.md` and

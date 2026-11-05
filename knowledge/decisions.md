@@ -180,3 +180,17 @@ Windows change. Hiding that behind a script is worse than one manual pick.
 Decision: step `60-apps` reads the recorded ProgId, reports the current
 browser, and opens the Default Apps page when it is not Zen. It never writes
 `UserChoice`. The profile offers `defaultapps` to reopen the page.
+
+## ADR 14: RDP is allowed only over Tailscale
+
+Status: accepted, 2026-11-05.
+
+Remote access from the Mac needs a host that is already in Windows Pro. RDP
+is built in and faster than a third-party relay. Opening port 3389 to the
+internet would be a serious mistake on an unpatched Windows 10 install.
+
+Decision: step `14-remote` enables RDP with Network Level Authentication and
+sets the Remote Desktop firewall rules to `100.64.0.0/10` plus
+`LocalSubnet`. Tailscale is the transport. RustDesk stays a manual install
+because it is not in winget, and Headscale is not installed because it is a
+server, not a client.

@@ -79,6 +79,10 @@ if ($plan.Count -eq 0) {
 Write-Log ("plan: {0}" -f ($plan -join ' -> '))
 if ($SkipUpdates) {
     Write-Warn 'Skipping 15-updates. This machine stays unpatched until you run it.'
+    if (-not $DryRun) {
+        Suspend-WindowsUpdate -Days 7 | Out-Null
+        Write-Warn 'A stuck feature update keeps retrying unless you restart, which rolls the attempt back.'
+    }
 }
 if ($DryRun) {
     Write-Host ''
